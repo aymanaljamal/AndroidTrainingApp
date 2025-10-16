@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Three Screens</string>
+    <string name="go_text">Text Screen</string>
+    <string name="go_spinner">Spinner Screen</string>
+    <string name="go_list">List Screen</string>
+    <string name="hint_type_something">Type something...</string>
+    <string name="btn_print">Print</string>
+    <string name="btn_activitay">New</string>
+    <string name="label_output">The result will appear here</string>
+    <string name="fab_add">Add Item</string>
+</resources>
