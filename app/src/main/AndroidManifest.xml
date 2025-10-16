@@ -6,17 +6,20 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ThreeScreens">
+        android:theme="@style/Theme.EchoAndListApp">
 
         <activity android:name=".ListNiceActivity" />
         <activity android:name=".SpinnerEchoActivity" />
         <activity android:name=".TextEchoActivity" />
         <activity android:name=".Activity" />
         <activity android:name=".secondActivty" />
+        <activity android:name=".RegistrationFormActivity" />
+        <activity android:name=".RegistrationLiteActivity" />
+        <activity android:name=".CustomFormActivity" />
 
         <activity
             android:name=".MainActivity"

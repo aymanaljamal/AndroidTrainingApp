@@ -16,7 +16,6 @@ public class Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityNewTextBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         binding.submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

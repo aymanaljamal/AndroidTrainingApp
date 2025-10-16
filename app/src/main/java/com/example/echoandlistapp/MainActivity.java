@@ -16,5 +16,9 @@ public class MainActivity extends AppCompatActivity {
         b.btnSpinner.setOnClickListener(v -> startActivity(new Intent(this, SpinnerEchoActivity.class)));
         b.btnList.setOnClickListener(v -> startActivity(new Intent(this, ListNiceActivity.class)));
         b.btactvivty.setOnClickListener(v -> startActivity(new Intent(this, Activity.class)));
+        b.btnRegister.setOnClickListener(v -> startActivity(new Intent(this, RegistrationFormActivity.class)));
+        b.btnRegisterLite.setOnClickListener(v -> startActivity(new Intent(this, RegistrationLiteActivity.class)));
+        b.btnCustomForm.setOnClickListener(v -> startActivity(new Intent(this, CustomFormActivity.class)));
+
     }
 }
