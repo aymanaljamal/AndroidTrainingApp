@@ -1,0 +1,17 @@
+<resources>
+    <string-array name="city_names">
+        <item>Ramallah</item>
+        <item>Nablus</item>
+        <item>Jerusalem</item>
+        <item>Hebron</item>
+        <item>Gaza</item>
+    </string-array>
+
+    <array name="city_icons">
+        <item>@drawable/ic_ramallah</item>
+        <item>@drawable/ic_nablus</item>
+        <item>@drawable/ic_jerusalem</item>
+        <item>@drawable/ic_hebron</item>
+        <item>@drawable/ic_gaza</item>
+    </array>
+</resources>

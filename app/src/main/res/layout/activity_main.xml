@@ -41,8 +41,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/btn_activitay" />
+            android:text="Opean New Screan "/>
 
+        <Button
+            android:id="@+id/btnRegister"
+            android:text="Open Registration Form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"/>
+
+        <Button
+            android:id="@+id/btnRegisterLite"
+            android:text="Open Registration (Lite)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"/>
+        <Button
+            android:id="@+id/btnCustomForm"
+            android:text="Open Custom Form (Spinner+Img)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

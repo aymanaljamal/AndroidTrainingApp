@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Three Screens</string>
+    <string name="app_name">Ayman Aljamal</string>
     <string name="go_text">Text Screen</string>
     <string name="go_spinner">Spinner Screen</string>
     <string name="go_list">List Screen</string>
@@ -8,4 +8,25 @@
     <string name="btn_activitay">New</string>
     <string name="label_output">The result will appear here</string>
     <string name="fab_add">Add Item</string>
+    <string name="hint_full_name">Full Name</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_confirm_password">Confirm Password</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="accept_terms">I accept the Terms &amp; Privacy</string>
+    <string name="btn_create_account">Create Account</string>
+    <string name="title_registration">Registration</string>
+    <string name="toast_gender">Choose gender</string>
+    <string name="toast_terms">Accept terms</string>
+    <string name="toast_registered">Registered: %1$s (%2$s)</string>
+    <string name="title_custom_form">Create Account</string>
+    <string name="terms">I accept the Terms</string>
+    <string name="subscribe">Subscribe to newsletter</string>
+    <string name="btn_submit">Submit</string>
+    <string name="btn_pwd_hint">Password hint</string>
+    <string name="pwd_hint_text">Password must be at least 6 characters, include a letter and a number.</string>
+    <string name="dialog_title_info">Account Info</string>
+    <string name="dialog_close">Close</string>
+
 </resources>
