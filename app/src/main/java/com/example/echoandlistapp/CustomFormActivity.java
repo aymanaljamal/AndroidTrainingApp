@@ -50,6 +50,7 @@ public class CustomFormActivity extends AppCompatActivity {
                     .setTitle(getString(R.string.btn_pwd_hint))
                     .setMessage(getString(R.string.pwd_hint_text))
                     .setPositiveButton(getString(R.string.dialog_close), null)
+                    .setIcon(R.drawable.ic_hint)
                     .show();
         });
 

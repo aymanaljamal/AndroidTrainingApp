@@ -1,67 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingTop="24dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/startGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
+        app:layout_constraintGuide_begin="24dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/endGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="24dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:text="@string/go_text"
+        android:layout_marginTop="8dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginHorizontal="24dp">
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSpinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/go_spinner"
+        app:layout_constraintTop_toBottomOf="@id/btnText"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/go_text" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnList"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/go_list"
+        app:layout_constraintTop_toBottomOf="@id/btnSpinner"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/go_spinner"
-            android:layout_marginTop="16dp" />
+    <View
+        android:id="@+id/divider1"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btnList"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/go_list"
-            android:layout_marginTop="16dp" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRegister"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Open Registration Form"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/divider1"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btactvivty"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Opean New Screan "/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRegisterLite"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Open Registration (Lite)"
+        app:layout_constraintTop_toBottomOf="@id/btnRegister"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
 
-        <Button
-            android:id="@+id/btnRegister"
-            android:text="Open Registration Form"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCustomForm"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Open Custom Form (Spinner+Img)"
+        app:layout_constraintTop_toBottomOf="@id/btnRegisterLite"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
 
-        <Button
-            android:id="@+id/btnRegisterLite"
-            android:text="Open Registration (Lite)"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"/>
-        <Button
-            android:id="@+id/btnCustomForm"
-            android:text="Open Custom Form (Spinner+Img)"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"/>
-    </LinearLayout>
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btnCustomForm"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnChat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Open Chat"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/divider2"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnOpenNewScreen"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Open New Screen"
+        app:layout_constraintTop_toBottomOf="@id/btnChat"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLinks"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Links (Drupal URLs)"
+        app:layout_constraintTop_toBottomOf="@id/btnOpenNewScreen"
+        app:layout_constraintStart_toStartOf="@id/startGuideline"
+        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
