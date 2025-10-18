@@ -1,20 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="seed">#00D1B2</color>
-    <color name="colorPrimary">#00D1B2</color>
-    <color name="onPrimary">#00201A</color>
-    <color name="colorSecondary">#FF6B6B</color>
+
+    <color name="seed">#6366F1</color>
+    <color name="colorPrimary">#6366F1</color>
+    <color name="onPrimary">#FFFFFF</color>
+
+
+    <color name="colorSecondary">#EC4899</color>
     <color name="onSecondary">#FFFFFF</color>
-    <color name="colorTertiary">#FFB703</color>
-    <color name="onTertiary">#2A1800</color>
-    <color name="colorBackground">#FCFEFF</color>
-    <color name="onBackground">#0F172A</color>
-    <color name="colorSurface">#FFFFFF</color>
-    <color name="onSurface">#0F172A</color>
-    <color name="surfaceVariant">#E6F6F3</color>
-    <color name="onSurfaceVariant">#245E56</color>
-    <color name="outline">#7AAEA5</color>
-    <color name="error">#B3261E</color>
-    <color name="onError">#FFFFFF</color>
+
+
+    <color name="colorTertiary">#F59E0B</color>
+    <color name="onTertiary">#FFFFFF</color>
     <color name="white_custom">#FFFFFF</color>
+
+    <color name="colorBackground">#FAFAFF</color>
+    <color name="onBackground">#1E293B</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="onSurface">#1E293B</color>
+
+
+    <color name="surfaceVariant">#F1F5F9</color>
+    <color name="onSurfaceVariant">#64748B</color>
+    <color name="outline">#E2E8F0</color>
+
+
+    <color name="error">#EF4444</color>
+    <color name="onError">#FFFFFF</color>
+
+
+    <color name="success">#10B981</color>
+    <color name="warning">#F59E0B</color>
+    <color name="info">#3B82F6</color>
+
+    <color name="gradient_start">#6366F1</color>
+    <color name="gradient_end">#EC4899</color>
+    <color name="gradient_light_start">#C7D2FE</color>
+    <color name="gradient_light_end">#FBCFE8</color>
 </resources>
