@@ -16,19 +16,20 @@
         android:theme="@style/Theme.EchoAndListApp"
         android:usesCleartextTraffic="true">
 
-        <activity android:name=".ListNiceActivity" />
-        <activity android:name=".SpinnerEchoActivity" />
-        <activity android:name=".TextEchoActivity" />
-        <activity android:name=".Activity" />
-        <activity android:name=".secondActivty" />
-        <activity android:name=".RegistrationFormActivity" />
-        <activity android:name=".RegistrationLiteActivity" />
-        <activity android:name=".CustomFormActivity" />
-        <activity android:name=".ChatActivity" android:exported="false"/>
-        <activity android:name=".LinksActivity" android:exported="false"/>
+        <activity android:name=".feature.listnice.ListNiceActivity" />
+        <activity android:name=".feature.echo.SpinnerEchoActivity" />
+        <activity android:name=".feature.echo.TextEchoActivity" />
+        <activity android:name=".feature.playground.Activity" />
+        <activity android:name=".feature.playground.secondActivty" />
+        <activity android:name=".feature.forms.RegistrationFormActivity" />
+        <activity android:name=".feature.forms.RegistrationLiteActivity" />
+        <activity android:name=".feature.forms.CustomFormActivity" />
+        <activity android:name=".feature.chat.ChatActivity" android:exported="false"/>
+        <activity android:name=".feature.links.LinksActivity" android:exported="false"/>
+        <activity android:name=".feature.chat.ChatActivity2" android:exported="false"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".feature.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

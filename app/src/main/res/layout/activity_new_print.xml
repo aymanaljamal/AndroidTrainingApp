@@ -6,7 +6,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".secondActivty">
+    tools:context=".feature.playground.secondActivty">
 
     <TextView
         android:id="@+id/textView221"

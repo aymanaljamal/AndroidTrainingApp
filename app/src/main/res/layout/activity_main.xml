@@ -5,124 +5,265 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackground"
     android:paddingTop="24dp">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/startGuideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="24dp" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/endGuideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_end="24dp" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnText"
+    <!-- خلفية متدرجة -->
+    <View
+        android:id="@+id/backgroundGradient"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/go_text"
-        android:layout_marginTop="8dp"
+        android:layout_height="280dp"
+        android:background="@drawable/bg_gradient_main"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSpinner"
+    <!-- الهيدر -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/headerCard"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/go_spinner"
-        app:layout_constraintTop_toBottomOf="@id/btnText"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+        android:layout_height="120dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="32dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/colorSurface"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnList"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/go_list"
-        app:layout_constraintTop_toBottomOf="@id/btnSpinner"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="20dp">
 
-    <View
-        android:id="@+id/divider1"
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_app_logo"
+                android:contentDescription="@string/app_name"
+                android:background="@drawable/bg_icon_gradient"
+                android:padding="12dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textColor="@color/onSurface"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="اختر الوظيفة المطلوبة"
+                    android:textColor="@color/onSurfaceVariant"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- محتوى الأزرار في ScrollView -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
+        android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btnList"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+        android:paddingBottom="24dp"
+        app:layout_constraintTop_toBottomOf="@id/headerCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnRegister"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Open Registration Form"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/divider1"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnRegisterLite"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Open Registration (Lite)"
-        app:layout_constraintTop_toBottomOf="@id/btnRegister"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+            <!-- المجموعة 1: الأمثلة البسيطة -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="الأمثلة الأساسية"
+                android:textColor="@color/onSurfaceVariant"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCustomForm"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Open Custom Form (Spinner+Img)"
-        app:layout_constraintTop_toBottomOf="@id/btnRegisterLite"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnText"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="نص إيكو"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_text"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/colorPrimary"
+                android:layout_marginTop="8dp" />
 
-    <View
-        android:id="@+id/divider2"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btnCustomForm"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSpinner"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="سبينر إيكو"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_spinner"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/colorSecondary"
+                android:layout_marginTop="8dp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnChat"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Open Chat"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/divider2"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnList"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="القائمة الجميلة"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_list"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/colorTertiary"
+                android:layout_marginTop="8dp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnOpenNewScreen"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Open New Screen"
-        app:layout_constraintTop_toBottomOf="@id/btnChat"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+            <!-- المجموعة 2: النماذج -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="النماذج والتسجيل"
+                android:textColor="@color/onSurfaceVariant"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLinks"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Links (Drupal URLs)"
-        app:layout_constraintTop_toBottomOf="@id/btnOpenNewScreen"
-        app:layout_constraintStart_toStartOf="@id/startGuideline"
-        app:layout_constraintEnd_toEndOf="@id/endGuideline" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRegister"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="نموذج التسجيل الكامل"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_register"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/success"
+                android:layout_marginTop="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRegisterLite"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="نموذج التسجيل المختصر"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_register_lite"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/info"
+                android:layout_marginTop="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCustomForm"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="نموذج مخصص"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_custom_form"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/warning"
+                android:layout_marginTop="8dp" />
+
+            <!-- المجموعة 3: أخرى -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="وظائف أخرى"
+                android:textColor="@color/onSurfaceVariant"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChat"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="الدردشة"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_chat"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/colorPrimary"
+                android:layout_marginTop="8dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChat2"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="الدردشة2"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_chat"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/colorPrimary"
+                android:layout_marginTop="8dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOpenNewScreen"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="شاشة جديدة"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_new_screen"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/colorSecondary"
+                android:layout_marginTop="8dp" />
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLinks"
+                style="@style/Widget.App.Button.Elevated"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="الروابط (Drupal)"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_links"
+                android:drawablePadding="12dp"
+                app:iconPadding="12dp"
+                app:backgroundTint="@color/colorTertiary"
+                android:layout_marginTop="8dp" />
+
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
