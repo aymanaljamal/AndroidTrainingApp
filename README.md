@@ -704,6 +704,10 @@ public class MainActivity extends AppCompatActivity {
 - `fullSensor`: جميع الاتجاهات الأربعة
 
 ### برمجياً (في الكود):
+
+
+<p dir="ltr">
+
 ```java
 // في Activity
 import android.content.pm.ActivityInfo;
@@ -718,6 +722,7 @@ setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 ```
 
+</p>
 ---
 
 ## 💾 Data Persistence
@@ -990,6 +995,7 @@ public void readImages() {
 ```
 
 ### مثال 3: استخدام WHERE clause (فلترة البيانات)
+<p dir="ltr">
 
 ```java
 // البحث عن جهة اتصال باسم معين
@@ -1004,6 +1010,8 @@ Cursor cursor = getContentResolver().query(
     null
 );
 ```
+
+</p>
 
 ### مثال 4: قراءة أرقام الهواتف لجهة اتصال
 
