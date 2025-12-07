@@ -5,7 +5,6 @@
 
 ملف مرجعي مرتب يحتوي على أهم خصائص Android XML، القيم الافتراضية، أمثلة جاهزة، وروابط مشاريع.
 
----
 
 ## 📁 روابط المشاريع
 - https://github.com/szainbzu/app_two_activities  
@@ -13,10 +12,10 @@
 - https://github.com/szainbzu/sharedprefs2  
 - https://github.com/szainbzu/gson_v  
 
----
+
 
 # 📄 AndroidManifest.xml
-```xml
+
 <manifest package="com.example.app"> <!-- 1️⃣ الحزمة -->
     <uses-permission android:name="android.permission.INTERNET"/> <!-- 2️⃣ الإنترنت -->
     
@@ -40,13 +39,13 @@
 </manifest>
 ````
 
----
+
 
 # 📐 Layouts
 
 ## **LinearLayout**
 
-```xml
+
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -57,7 +56,7 @@
 
 ## **ConstraintLayout**
 
-```xml
+
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -75,13 +74,13 @@
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
----
+
 
 # 🧩 عناصر الواجهة (UI Widgets)
 
 ## **TextView**
 
-```xml
+
 <TextView
     android:id="@+id/textView"
     android:layout_width="wrap_content"
@@ -95,7 +94,7 @@
 
 ## **EditText**
 
-```xml
+
 <EditText
     android:id="@+id/editText"
     android:layout_width="match_parent"
@@ -111,7 +110,7 @@
 
 ### **أنواع الإدخال**
 
-```xml
+
 android:inputType="text"
 android:inputType="textPassword"
 android:inputType="number"
@@ -121,7 +120,7 @@ android:inputType="textEmailAddress"
 
 ## **Button**
 
-```xml
+
 <Button
     android:id="@+id/button"
     android:layout_width="wrap_content"
@@ -134,7 +133,7 @@ android:inputType="textEmailAddress"
 
 ## **ImageView**
 
-```xml
+
 <ImageView
     android:id="@+id/imageView"
     android:layout_width="100dp"
@@ -147,7 +146,6 @@ android:inputType="textEmailAddress"
 
 ## **RecyclerView**
 
-```xml
 <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/recyclerView"
     android:layout_width="match_parent"
@@ -159,7 +157,6 @@ android:inputType="textEmailAddress"
 
 ## **CardView**
 
-```xml
 <androidx.cardview.widget.CardView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -175,7 +172,7 @@ android:inputType="textEmailAddress"
 
 ## **styles.xml**
 
-```xml
+
 <style name="AppTheme" parent="Theme.MaterialComponents">
     <item name="colorPrimary">@color/purple_500</item>
     <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -189,7 +186,7 @@ android:inputType="textEmailAddress"
 
 ## **colors.xml**
 
-```xml
+
 <color name="purple_500">#FF6200EE</color>
 <color name="purple_700">#FF3700B3</color>
 <color name="teal_200">#FF03DAC5</color>
@@ -199,7 +196,7 @@ android:inputType="textEmailAddress"
 
 ## **strings.xml**
 
-```xml
+
 <string name="app_name">تطبيقي</string>
 <string name="hello">مرحباً</string>
 <string name="submit">إرسال</string>
@@ -239,7 +236,7 @@ android:inputType="textEmailAddress"
 * `android:scaleType`
 * `android:adjustViewBounds`
 
----
+
 
 # 📱 القيم الافتراضية في Android XML
 
@@ -265,7 +262,7 @@ android:inputType="textEmailAddress"
 
 ## TextView
 
-```xml
+
 <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -277,7 +274,7 @@ android:inputType="textEmailAddress"
 
 ## EditText
 
-```xml
+
 <EditText
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -288,14 +285,13 @@ android:inputType="textEmailAddress"
 
 ## Button
 
-```xml
+
 <Button
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAllCaps="true"/>
 ```
 
----
 
 # 📏 الوحدات
 
@@ -303,13 +299,6 @@ android:inputType="textEmailAddress"
 * **sp** → للنصوص
 * **px** → غير مفضل
 
----
 
-# ✔️ انتهى — README جاهز بالكامل
 
-انسخه وحطه بأي Repo، أو إذا بدك **حوّله PDF** جهّزلي إياه بضغطه زر.
-
-```markdown
-
----
 
