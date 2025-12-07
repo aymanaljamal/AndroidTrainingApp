@@ -1153,6 +1153,480 @@ public void readSMS() {
 
 ---
 
+
+# 📚 Android Complete Guide – Lifecycle, ViewModel, Gson, Volley, SharedPreferences
+
+## 🟢 مقدمة
+
+هذا الدليل يوضح لك كل شيء عن إدارة بيانات JSON و XML، التخزين المحلي، استخدام ViewModel و LiveData، وفهم **Activity/Fragment Lifecycle** مع سيناريوهات عملية كبيرة جداً، وطريقة طباعة **States على Logcat** لمراقبة كل الأحداث.
+
+---
+
+## 1️⃣ إعدادات Dependencies
+
+```gradle
+dependencies {
+    implementation 'com.android.volley:volley:1.2.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
+}
+```
+
+---
+
+## 2️⃣ نموذج البيانات (Model Class)
+
+```java
+public class User {
+    private String name;
+    private int age;
+
+    public User(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public int getAge() { return age; }
+    public void setAge(int age) { this.age = age; }
+}
+```
+
+---
+
+## 3️⃣ ViewModel + LiveData + SharedPreferences
+
+```java
+public class UserViewModel extends ViewModel {
+    private MutableLiveData<User> userLiveData = new MutableLiveData<>();
+
+    public LiveData<User> getUser() { return userLiveData; }
+    public void setUser(User user) { userLiveData.setValue(user); }
+
+    public void saveUserToPrefs(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        prefs.edit().putString("user_data", gson.toJson(userLiveData.getValue())).apply();
+        Log.d("UserViewModel", "Saved User to SharedPreferences: " + gson.toJson(userLiveData.getValue()));
+    }
+
+    public void loadUserFromPrefs(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+        String jsonString = prefs.getString("user_data", null);
+        if(jsonString != null) {
+            Gson gson = new Gson();
+            userLiveData.setValue(gson.fromJson(jsonString, User.class));
+            Log.d("UserViewModel", "Loaded User from SharedPreferences: " + jsonString);
+        }
+    }
+}
+```
+
+---
+
+## 4️⃣ JSON + Gson + Volley
+
+```java
+RequestQueue queue = Volley.newRequestQueue(this);
+String url = "https://api.example.com/user";
+
+JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+    response -> {
+        Gson gson = new Gson();
+        User user = gson.fromJson(response.toString(), User.class);
+        Log.d("Volley", "User from API: " + user.getName() + ", " + user.getAge());
+
+        SharedPreferences prefs = getSharedPreferences("myPrefs", MODE_PRIVATE);
+        prefs.edit().putString("user_data", response.toString()).apply();
+
+        // تحديث ViewModel
+        // userViewModel.setUser(user);
+    },
+    error -> Log.e("Volley", "Error: " + error.toString())
+);
+
+queue.add(request);
+```
+
+---
+
+## 5️⃣ Activity Lifecycle + Logcat Tracking
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    Log.d("Lifecycle", "onCreate called");
+}
+
+@Override
+protected void onStart() {
+    super.onStart();
+    Log.d("Lifecycle", "onStart called");
+}
+
+@Override
+protected void onResume() {
+    super.onResume();
+    Log.d("Lifecycle", "onResume called");
+}
+
+@Override
+protected void onPause() {
+    super.onPause();
+    Log.d("Lifecycle", "onPause called");
+}
+
+@Override
+protected void onStop() {
+    super.onStop();
+    Log.d("Lifecycle", "onStop called");
+}
+
+@Override
+protected void onRestart() {
+    super.onRestart();
+    Log.d("Lifecycle", "onRestart called");
+}
+
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    Log.d("Lifecycle", "onDestroy called");
+}
+```
+
+---
+
+## 6️⃣ سيناريوهات كبيرة مع Logcat
+
+### 6.1 الضغط على زر Back
+
+```java
+@Override
+public void onBackPressed() {
+    Log.d("LifecycleScenario", "Back button pressed");
+    userViewModel.saveUserToPrefs(this);
+    super.onBackPressed();
+}
+```
+
+### 6.2 تغيير الاتجاه
+
+```java
+@Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+        Log.d("LifecycleScenario", "Orientation: LANDSCAPE");
+    } else {
+        Log.d("LifecycleScenario", "Orientation: PORTRAIT");
+    }
+}
+```
+
+### 6.3 تشغيل فيديو والانتقال بين التطبيقات
+
+```java
+@Override
+protected void onPause() {
+    super.onPause();
+    videoView.pause();
+    Log.d("LifecycleScenario", "Video paused onPause");
+}
+
+@Override
+protected void onResume() {
+    super.onResume();
+    videoView.start();
+    Log.d("LifecycleScenario", "Video resumed onResume");
+}
+```
+
+### 6.4 استقبال بيانات من الشبكة أثناء Lifecycle
+
+```java
+JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+    response -> {
+        Gson gson = new Gson();
+        User user = gson.fromJson(response.toString(), User.class);
+        Log.d("LifecycleScenario", "Fetched User: " + user.getName());
+
+        userViewModel.setUser(user);
+        Log.d("LifecycleScenario", "User updated in ViewModel");
+    },
+    error -> Log.e("LifecycleScenario", "Error fetching user", error)
+);
+queue.add(request);
+```
+
+### 6.5 إعادة فتح التطبيق بعد الضغط على Home
+
+```java
+@Override
+protected void onRestart() {
+    super.onRestart();
+    Log.d("LifecycleScenario", "App restarted");
+    userViewModel.loadUserFromPrefs(this);
+}
+```
+
+---
+
+## 7️⃣ ملاحظات عملية
+
+1. طباعة كل خطوة في **Logcat** تساعد على تتبع مشاكل Lifecycle والشبكة.
+2. استخدم **ViewModel + LiveData** للحفاظ على البيانات عند تغييرات الشاشة.
+3. احفظ دائمًا البيانات المهمة قبل الخروج أو عند onPause.
+4. تعامل مع الشبكة و JSON بعناية لتجنب Crash.
+5. يمكن توسيع السيناريوهات لتشمل **Fragment Lifecycle** و **Multiple Activities**.
+
+---
+تمام، رح أكتب لك **سيناريو شامل بدون كود**، على شكل خطوات **مثل Logcat outputs**، بحيث تشوف كل حالات الـ **Lifecycle + الأحداث المختلفة + البيانات** وكأن التطبيق فعليًا يطبع على Logcat. رح يكون طويل ومفصل جدًا لتغطي معظم السيناريوهات.
+
+---
+
+# 📖 Android Lifecycle & Data Flow – Logcat Scenario
+
+## 🔹 1. فتح التطبيق لأول مرة
+
+```
+2025-12-07 14:00:00.000 D/Lifecycle: onCreate called
+2025-12-07 14:00:00.050 D/Lifecycle: onStart called
+2025-12-07 14:00:00.100 D/Lifecycle: onResume called
+2025-12-07 14:00:00.150 D/UserViewModel: Loaded User from SharedPreferences: null
+2025-12-07 14:00:00.200 D/Volley: Sending GET request to https://api.example.com/user
+2025-12-07 14:00:00.500 D/Volley: User from API: Ahmed, 25
+2025-12-07 14:00:00.550 D/UserViewModel: User updated in ViewModel
+2025-12-07 14:00:00.600 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ahmed","age":25}
+```
+
+---
+
+## 🔹 2. المستخدم يضغط زر Home (App goes to background)
+
+```
+2025-12-07 14:05:00.000 D/Lifecycle: onPause called
+2025-12-07 14:05:00.050 D/Lifecycle: onStop called
+2025-12-07 14:05:00.100 D/UserViewModel: Video paused onPause
+```
+
+---
+
+## 🔹 3. المستخدم يعود للتطبيق (onRestart + onResume)
+
+```
+2025-12-07 14:10:00.000 D/Lifecycle: onRestart called
+2025-12-07 14:10:00.050 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
+2025-12-07 14:10:00.100 D/Lifecycle: onStart called
+2025-12-07 14:10:00.150 D/Lifecycle: onResume called
+2025-12-07 14:10:00.200 D/UserViewModel: Video resumed onResume
+```
+
+---
+
+## 🔹 4. المستخدم يغير اتجاه الشاشة (Orientation Change)
+
+```
+2025-12-07 14:15:00.000 D/LifecycleScenario: Orientation: PORTRAIT -> LANDSCAPE
+2025-12-07 14:15:00.050 D/Lifecycle: onPause called
+2025-12-07 14:15:00.100 D/Lifecycle: onStop called
+2025-12-07 14:15:00.150 D/Lifecycle: onDestroy called
+2025-12-07 14:15:00.200 D/Lifecycle: onCreate called
+2025-12-07 14:15:00.250 D/Lifecycle: onStart called
+2025-12-07 14:15:00.300 D/Lifecycle: onResume called
+2025-12-07 14:15:00.350 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
+```
+
+---
+
+## 🔹 5. المستخدم يضغط زر Back للخروج
+
+```
+2025-12-07 14:20:00.000 D/LifecycleScenario: Back button pressed
+2025-12-07 14:20:00.050 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ahmed","age":25}
+2025-12-07 14:20:00.100 D/Lifecycle: onPause called
+2025-12-07 14:20:00.150 D/Lifecycle: onStop called
+2025-12-07 14:20:00.200 D/Lifecycle: onDestroy called
+```
+
+---
+
+## 🔹 6. تشغيل فيديو، ثم استقبال مكالمة واردة
+
+```
+2025-12-07 14:25:00.000 D/Lifecycle: onPause called
+2025-12-07 14:25:00.050 D/UserViewModel: Video paused onPause
+2025-12-07 14:25:00.100 D/Lifecycle: onStop called
+```
+
+بعد انتهاء المكالمة:
+
+```
+2025-12-07 14:30:00.000 D/Lifecycle: onRestart called
+2025-12-07 14:30:00.050 D/Lifecycle: onStart called
+2025-12-07 14:30:00.100 D/Lifecycle: onResume called
+2025-12-07 14:30:00.150 D/UserViewModel: Video resumed onResume
+```
+
+---
+
+## 🔹 7. تحديث بيانات من الشبكة أثناء تشغيل التطبيق
+
+```
+2025-12-07 14:35:00.000 D/Volley: Sending GET request to https://api.example.com/user
+2025-12-07 14:35:00.300 D/Volley: User from API: Ali, 30
+2025-12-07 14:35:00.350 D/UserViewModel: User updated in ViewModel
+2025-12-07 14:35:00.400 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ali","age":30}
+```
+
+---
+
+## 🔹 8. التطبيق يعمل في الخلفية ويستقبل إشعار Network
+
+```
+2025-12-07 14:40:00.000 D/Lifecycle: onPause called
+2025-12-07 14:40:00.050 D/Lifecycle: onStop called
+2025-12-07 14:40:00.100 D/NotificationHandler: Received push notification
+2025-12-07 14:40:00.150 D/NotificationHandler: User data fetched in background: {"name":"Ali","age":30}
+```
+
+---
+
+## 🔹 9. التطبيق يعود ويستأنف الفيديو + تحديث بيانات JSON من SharedPreferences
+
+```
+2025-12-07 14:45:00.000 D/Lifecycle: onRestart called
+2025-12-07 14:45:00.050 D/Lifecycle: onStart called
+2025-12-07 14:45:00.100 D/Lifecycle: onResume called
+2025-12-07 14:45:00.150 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ali","age":30}
+2025-12-07 14:45:00.200 D/UserViewModel: Video resumed onResume
+```
+
+---
+## 🔹10.  التطبيق مفتوح أول مرة
+
+```
+2025-12-07 15:00:00.000 D/Lifecycle: onCreate called
+2025-12-07 15:00:00.050 D/Lifecycle: onStart called
+2025-12-07 15:00:00.100 D/Lifecycle: onResume called
+2025-12-07 15:00:00.150 D/UserViewModel: Loaded User from SharedPreferences: null
+2025-12-07 15:00:00.200 D/Volley: Sending GET request to https://api.example.com/user
+2025-12-07 15:00:00.500 D/Volley: User from API: Ahmed, 25
+2025-12-07 15:00:00.550 D/UserViewModel: User updated in ViewModel
+2025-12-07 15:00:00.600 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ahmed","age":25}
+2025-12-07 15:00:00.650 D/UserViewModel: Video started
+```
+
+---
+
+## 🔹 11. المستخدم يضغط زر Home
+
+```
+2025-12-07 15:05:00.000 D/Lifecycle: onPause called
+2025-12-07 15:05:00.050 D/UserViewModel: Video paused
+2025-12-07 15:05:00.100 D/Lifecycle: onStop called
+```
+
+---
+
+## 🔹 12.  أثناء وجود التطبيق في الخلفية – مكالمة واردة
+
+```
+2025-12-07 15:06:00.000 D/Lifecycle: (App is stopped)
+2025-12-07 15:06:00.050 D/PhoneCall: Incoming call detected
+2025-12-07 15:06:00.100 D/UserViewModel: Pausing background tasks / notifications
+```
+
+---
+
+## 🔹 13.  المستخدم ينهي المكالمة ويعود للتطبيق
+
+```
+2025-12-07 15:10:00.000 D/Lifecycle: onRestart called
+2025-12-07 15:10:00.050 D/Lifecycle: onStart called
+2025-12-07 15:10:00.100 D/Lifecycle: onResume called
+2025-12-07 15:10:00.150 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
+2025-12-07 15:10:00.200 D/UserViewModel: Video resumed
+```
+
+---
+
+## 🔹 14.  المستخدم يغير اتجاه الشاشة (Portrait → Landscape)
+
+```
+2025-12-07 15:15:00.000 D/LifecycleScenario: Orientation change detected
+2025-12-07 15:15:00.050 D/Lifecycle: onPause called
+2025-12-07 15:15:00.100 D/Lifecycle: onStop called
+2025-12-07 15:15:00.150 D/Lifecycle: onDestroy called
+2025-12-07 15:15:00.200 D/Lifecycle: onCreate called
+2025-12-07 15:15:00.250 D/Lifecycle: onStart called
+2025-12-07 15:15:00.300 D/Lifecycle: onResume called
+2025-12-07 15:15:00.350 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
+2025-12-07 15:15:00.400 D/UserViewModel: Video resumed
+```
+
+---
+
+## 🔹 15.  المستخدم يضغط زر Back داخل Activity
+
+```
+2025-12-07 15:20:00.000 D/LifecycleScenario: Back button pressed
+2025-12-07 15:20:00.050 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ahmed","age":25}
+2025-12-07 15:20:00.100 D/Lifecycle: onPause called
+2025-12-07 15:20:00.150 D/Lifecycle: onStop called
+2025-12-07 15:20:00.200 D/Lifecycle: onDestroy called
+```
+
+---
+
+## 🔹 16.  المستخدم يفتح التطبيق مرة ثانية، البيانات محدثة من الشبكة
+
+```
+2025-12-07 15:25:00.000 D/Lifecycle: onCreate called
+2025-12-07 15:25:00.050 D/Lifecycle: onStart called
+2025-12-07 15:25:00.100 D/Lifecycle: onResume called
+2025-12-07 15:25:00.150 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
+2025-12-07 15:25:00.200 D/Volley: Sending GET request to https://api.example.com/user
+2025-12-07 15:25:00.500 D/Volley: User from API: Ali, 30
+2025-12-07 15:25:00.550 D/UserViewModel: User updated in ViewModel
+2025-12-07 15:25:00.600 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ali","age":30}
+```
+
+---
+
+```
+          onCreate
+             |
+             v
+          onStart
+             |
+             v
+          onResume -------------------------+
+             |                               |
+             |                               |
+             v                               |
+          onPause                             |
+             |                               |
+             v                               |
+          onStop ----------------------------+
+             |
+             v
+          onRestart
+             |
+             v
+          onStart
+             |
+             v
+          onResume
+             |
+          (Back/Home/Orientation/Call)
+             |
+         onPause -> onStop -> onDestroy
+```
+
 ## 📚 مصادر إضافية
 
 ### الوثائق الرسمية:
