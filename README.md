@@ -1924,12 +1924,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 3. **Java Object** يمثل البيانات بشكل منطقي، ويستعمل مع أي مصدر: JSON أو XML
 
 ---
-📌 شرح Intents في Android
+## 📌 شرح Intents في Android
 1. ما هو Intent؟
 
-Intent هو رسالة داخلية في Android تقول:
-
+هو رسالة داخلية في Android تقول
 "أريد أن أفعل هذا الشيء، هل هناك مكون يمكنه التعامل معه؟"
+
 
 يمكن استخدامه لفتح Activity، بدء Service، أو إرسال Broadcast.
 
@@ -2127,6 +2127,136 @@ finish();
 
 ---
 
+## **1️⃣ ما هو Action في Intent؟**
+
+* **Action** يحدد ما تريد أن يحدث عند إرسال الـ Intent.
+* هو **سطر التعريف** لما تريد من النظام أو أي Activity القيام به.
+* مثال: `Intent.ACTION_VIEW` → افتح شيء للعرض، أو `Intent.ACTION_SEND` → شارك شيئًا.
+
+---
+
+## **2️⃣ أشهر أنواع الـ Actions**
+
+### **أ) ACTION_VIEW**
+
+* لعرض محتوى للمستخدم (رابط ويب، صورة، ملف).
+* مثال: فتح موقع ويب:
+
+```java
+Intent intent = new Intent(Intent.ACTION_VIEW);
+intent.setData(Uri.parse("https://www.google.com"));
+startActivity(intent);
+```
+
+---
+
+### **ب) ACTION_SEND**
+
+* لمشاركة نص أو صورة أو ملفات بين التطبيقات.
+* مثال: مشاركة نص:
+
+```java
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.setType("text/plain");
+intent.putExtra(Intent.EXTRA_TEXT, "Hello from my app!");
+startActivity(Intent.createChooser(intent, "Share via"));
+```
+
+---
+
+### **ج) ACTION_DIAL**
+
+* لفتح تطبيق الهاتف مع رقم محدد، بدون الاتصال مباشرة.
+* مثال:
+
+```java
+Intent intent = new Intent(Intent.ACTION_DIAL);
+intent.setData(Uri.parse("tel:123456789"));
+startActivity(intent);
+```
+
+---
+
+### **د) ACTION_CALL**
+
+* الاتصال مباشرة برقم (يحتاج صلاحيات `CALL_PHONE`).
+* مثال:
+
+```java
+Intent intent = new Intent(Intent.ACTION_CALL);
+intent.setData(Uri.parse("tel:123456789"));
+startActivity(intent);
+```
+
+---
+
+### **هـ) ACTION_PICK**
+
+* اختيار عنصر من قاعدة بيانات أو مجلد (مثل جهات الاتصال أو الصور).
+* مثال: اختيار جهة اتصال:
+
+```java
+Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+startActivityForResult(intent, REQUEST_CODE);
+```
+
+---
+
+### **و) ACTION_SENDTO**
+
+* إرسال رسالة بريد إلكتروني أو رسالة قصيرة SMS.
+* مثال لإرسال بريد إلكتروني:
+
+```java
+Intent intent = new Intent(Intent.ACTION_SENDTO);
+intent.setData(Uri.parse("mailto:example@gmail.com"));
+intent.putExtra(Intent.EXTRA_SUBJECT, "Subject here");
+intent.putExtra(Intent.EXTRA_TEXT, "Body of the email");
+startActivity(intent);
+```
+
+---
+
+### **ز) ACTION_EDIT**
+
+* تعديل بيانات أو محتوى موجود.
+* مثال: تعديل جهة اتصال:
+
+```java
+Intent intent = new Intent(Intent.ACTION_EDIT);
+intent.setData(Uri.parse("content://contacts/people/1"));
+startActivity(intent);
+```
+
+---
+
+### **ح) ACTION_MAIN**
+
+* عادة تستخدم لتحديد الـ Activity الرئيسي عند بدء التطبيق من الـ Launcher.
+* مثال في Manifest:
+
+```xml
+<intent-filter>
+    <action android:name="android.intent.action.MAIN" />
+    <category android:name="android.intent.category.LAUNCHER" />
+</intent-filter>
+```
+
+---
+
+### **ط) ACTION_BROWSE**
+
+* لفتح متصفح الملفات أو رابط معين داخل التطبيقات الداعمة.
+
+---
+
+### **ملاحظات عامة**
+
+* كل Action يمكن أن يقترن بـ **MIME type** لتحديد نوع البيانات (مثل نصوص، صور، فيديو).
+* بعض Actions تتطلب **صلاحيات إضافية** مثل `CALL_PHONE`.
+* عند استخدام **Implicit Intents**، Android يبحث عن أي Activity يمكنها التعامل مع هذا Action وData type.
+
+---
 ## 📚 مصادر إضافية
 
 ### الوثائق الرسمية:
@@ -2140,6 +2270,7 @@ finish();
 - [Vogella - Android Tutorials](https://www.vogella.com/tutorials/android.html)
 
 ---
+
 
 ## 🎯 ملخص سريع
 
