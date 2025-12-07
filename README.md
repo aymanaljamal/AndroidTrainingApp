@@ -803,7 +803,9 @@ if (prefs.contains("username")) {
 | ❌ لا يُرجع نتيجة | ✅ يُرجع true/false |
 | ✅ الأفضل في معظم الحالات | ⚠️ عند الحاجة لمعرفة النجاح |
 
-### مثال عملي - نظام تسجيل دخول:
+###مثال عملي - نظام تسجيل دخول:
+
+
 ```java
 public class LoginActivity extends AppCompatActivity {
     
@@ -819,7 +821,8 @@ public class LoginActivity extends AppCompatActivity {
             .putBoolean(KEY_IS_LOGGED_IN, true)
             .apply();
     }
-    
+
+
     // التحقق من تسجيل الدخول
     private boolean isLoggedIn() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -885,6 +888,7 @@ content://com.android.contacts/contacts/5
 ```
 
 #### الكود الكامل:
+
 ```java
 import android.database.Cursor;
 import android.net.Uri;
