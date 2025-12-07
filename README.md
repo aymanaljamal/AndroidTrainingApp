@@ -2269,7 +2269,7 @@ adapter.notifyDataSetChanged();
 
 ---
 
-## 📚 Additional Resources
+## 📚 مصادر إضافية
 
 - [Android Lifecycle Documentation](https://developer.android.com/guide/components/activities/activity-lifecycle)
 - [ViewModel Overview](https://developer.android.com/topic/libraries/architecture/viewmodel)
@@ -2277,20 +2277,7 @@ adapter.notifyDataSetChanged();
 - [Volley Documentation](https://developer.android.com/training/volley)
 - [Gson User Guide](https://github.com/google/gson/blob/master/UserGuide.md)
 
----
 
-## 📄 License
-This guide is provided as educational material. Feel free to use and modify as needed.
-
-## 🤝 Contributing
-Contributions are welcome! Feel free to submit issues or pull requests.
-
----
-
-**Created by**: Android Development Team  
-**Last Updated**: December 2025
----
-## 📚 مصادر إضافية
 
 ### الوثائق الرسمية:
 - [Android Developers - Layouts](https://developer.android.com/guide/topics/ui/declaring-layout)
@@ -2320,6 +2307,5 @@ Contributions are welcome! Feel free to submit issues or pull requests.
 
 ---
 
-**تم إنشاء هذا الدليل لمساعدة المطورين على فهم أساسيات Android UI و Data Persistence** 🚀
 
 💡 **نصيحة أخيرة:** مارس بكتابة الكود بنفسك! لا تكتفي بالقراءة فقط.
