@@ -1,6 +1,3 @@
-# 📚 ملف **ملخص ميزات Android XML** - لنسخه مرة واحدة فقط
-
-
 
 ## 📁 **روابط المشاريع**
 1. [app_two_activities](https://github.com/szainbzu/app_two_activities)
