@@ -1152,64 +1152,118 @@ public void readSMS() {
 3. ✅ لا تقم بعمليات طويلة في **UI Thread** (استخدم AsyncTask أو Coroutines)
 
 ---
-
-
-# 📚 Android Complete Guide – Lifecycle, ViewModel, Gson, Volley, SharedPreferences
-
-## 🟢 مقدمة
-
-هذا الدليل يوضح لك كل شيء عن إدارة بيانات JSON و XML، التخزين المحلي، استخدام ViewModel و LiveData، وفهم **Activity/Fragment Lifecycle** مع سيناريوهات عملية كبيرة جداً، وطريقة طباعة **States على Logcat** لمراقبة كل الأحداث.
-
+# 📚 Android Complete Guide – Lifecycle, ViewModel, Gson, Volley, SharedPreferences, RecyclerView, Intents
 ---
 
-## 1️⃣ إعدادات Dependencies
+## <a id="setup"></a>1️⃣ Setup & Dependencies
 
+### build.gradle (Module: app)
 ```gradle
 dependencies {
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
 }
+```
+
+### AndroidManifest.xml
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.CALL_PHONE" />
 ```
 
 ---
 
-## 2️⃣ نموذج البيانات (Model Class)
+## <a id="models"></a>2️⃣ Data Models
 
+### User.java
 ```java
-public class User {
+public class User implements Serializable {
     private String name;
     private int age;
+    private String email;
+    private Address address;
+    private List<String> phones;
 
-    public User(String name, int age) {
+    public User(String name, int age, String email) {
         this.name = name;
         this.age = age;
+        this.email = email;
     }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public int getAge() { return age; }
     public void setAge(int age) { this.age = age; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public Address getAddress() { return address; }
+    public void setAddress(Address address) { this.address = address; }
+    public List<String> getPhones() { return phones; }
+    public void setPhones(List<String> phones) { this.phones = phones; }
+}
+```
+
+### Address.java
+```java
+public class Address implements Serializable {
+    private String street;
+    private String city;
+    private String zip;
+
+    public Address(String street, String city, String zip) {
+        this.street = street;
+        this.city = city;
+        this.zip = zip;
+    }
+
+    public String getStreet() { return street; }
+    public void setStreet(String street) { this.street = street; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+    public String getZip() { return zip; }
+    public void setZip(String zip) { this.zip = zip; }
 }
 ```
 
 ---
 
-## 3️⃣ ViewModel + LiveData + SharedPreferences
+## <a id="viewmodel"></a>3️⃣ ViewModel + LiveData + SharedPreferences
 
+### UserViewModel.java
 ```java
 public class UserViewModel extends ViewModel {
+    private static final String TAG = "UserViewModel";
     private MutableLiveData<User> userLiveData = new MutableLiveData<>();
+    private MutableLiveData<List<User>> userListLiveData = new MutableLiveData<>();
 
-    public LiveData<User> getUser() { return userLiveData; }
-    public void setUser(User user) { userLiveData.setValue(user); }
+    public LiveData<User> getUser() {
+        return userLiveData;
+    }
+
+    public void setUser(User user) {
+        userLiveData.setValue(user);
+        Log.d(TAG, "User set: " + user.getName());
+    }
+
+    public LiveData<List<User>> getUserList() {
+        return userListLiveData;
+    }
+
+    public void setUserList(List<User> users) {
+        userListLiveData.setValue(users);
+        Log.d(TAG, "User list updated: " + users.size() + " users");
+    }
 
     public void saveUserToPrefs(Context context) {
         SharedPreferences prefs = context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
         Gson gson = new Gson();
-        prefs.edit().putString("user_data", gson.toJson(userLiveData.getValue())).apply();
-        Log.d("UserViewModel", "Saved User to SharedPreferences: " + gson.toJson(userLiveData.getValue()));
+        String json = gson.toJson(userLiveData.getValue());
+        prefs.edit().putString("user_data", json).apply();
+        Log.d(TAG, "Saved User to SharedPreferences: " + json);
     }
 
     public void loadUserFromPrefs(Context context) {
@@ -1217,8 +1271,31 @@ public class UserViewModel extends ViewModel {
         String jsonString = prefs.getString("user_data", null);
         if(jsonString != null) {
             Gson gson = new Gson();
-            userLiveData.setValue(gson.fromJson(jsonString, User.class));
-            Log.d("UserViewModel", "Loaded User from SharedPreferences: " + jsonString);
+            User user = gson.fromJson(jsonString, User.class);
+            userLiveData.setValue(user);
+            Log.d(TAG, "Loaded User from SharedPreferences: " + jsonString);
+        } else {
+            Log.d(TAG, "No saved user data found");
+        }
+    }
+
+    public void saveUserListToPrefs(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = gson.toJson(userListLiveData.getValue());
+        prefs.edit().putString("user_list_data", json).apply();
+        Log.d(TAG, "Saved User List to SharedPreferences");
+    }
+
+    public void loadUserListFromPrefs(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("myPrefs", Context.MODE_PRIVATE);
+        String jsonString = prefs.getString("user_list_data", null);
+        if(jsonString != null) {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<User>>(){}.getType();
+            List<User> users = gson.fromJson(jsonString, listType);
+            userListLiveData.setValue(users);
+            Log.d(TAG, "Loaded User List from SharedPreferences: " + users.size() + " users");
         }
     }
 }
@@ -1226,24 +1303,77 @@ public class UserViewModel extends ViewModel {
 
 ---
 
-## 4️⃣ JSON + Gson + Volley
+## <a id="network"></a>4️⃣ Network Operations with Volley + Gson
 
+### Fetch Single User from API
 ```java
 RequestQueue queue = Volley.newRequestQueue(this);
 String url = "https://api.example.com/user";
 
-JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+JsonObjectRequest request = new JsonObjectRequest(
+    Request.Method.GET, 
+    url, 
+    null,
     response -> {
         Gson gson = new Gson();
         User user = gson.fromJson(response.toString(), User.class);
-        Log.d("Volley", "User from API: " + user.getName() + ", " + user.getAge());
-
-        SharedPreferences prefs = getSharedPreferences("myPrefs", MODE_PRIVATE);
-        prefs.edit().putString("user_data", response.toString()).apply();
-
-        // تحديث ViewModel
-        // userViewModel.setUser(user);
+        Log.d("Volley", "User from API: " + user.getName() + ", Age: " + user.getAge());
+        
+        // Update ViewModel
+        userViewModel.setUser(user);
+        
+        // Save to SharedPreferences
+        userViewModel.saveUserToPrefs(this);
     },
+    error -> {
+        Log.e("Volley", "Error: " + error.toString());
+        Toast.makeText(this, "Failed to fetch user", Toast.LENGTH_SHORT).show();
+    }
+);
+
+queue.add(request);
+```
+
+### Fetch User List from API
+```java
+String url = "https://api.example.com/users";
+
+JsonArrayRequest request = new JsonArrayRequest(
+    Request.Method.GET,
+    url,
+    null,
+    response -> {
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<User>>(){}.getType();
+        List<User> users = gson.fromJson(response.toString(), listType);
+        
+        Log.d("Volley", "Fetched " + users.size() + " users");
+        userViewModel.setUserList(users);
+        userViewModel.saveUserListToPrefs(this);
+    },
+    error -> Log.e("Volley", "Error: " + error.toString())
+);
+
+queue.add(request);
+```
+
+### POST Request Example
+```java
+String url = "https://api.example.com/user/create";
+JSONObject jsonBody = new JSONObject();
+try {
+    jsonBody.put("name", "Ahmed");
+    jsonBody.put("age", 25);
+    jsonBody.put("email", "ahmed@example.com");
+} catch (JSONException e) {
+    e.printStackTrace();
+}
+
+JsonObjectRequest request = new JsonObjectRequest(
+    Request.Method.POST,
+    url,
+    jsonBody,
+    response -> Log.d("Volley", "User created: " + response.toString()),
     error -> Log.e("Volley", "Error: " + error.toString())
 );
 
@@ -1252,604 +1382,191 @@ queue.add(request);
 
 ---
 
-## 5️⃣ Activity Lifecycle + Logcat Tracking
+## <a id="lifecycle"></a>5️⃣ Activity Lifecycle with Logcat Tracking
 
+### MainActivity.java
 ```java
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    Log.d("Lifecycle", "onCreate called");
-}
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "Lifecycle";
+    private UserViewModel userViewModel;
+    private VideoView videoView;
 
-@Override
-protected void onStart() {
-    super.onStart();
-    Log.d("Lifecycle", "onStart called");
-}
-
-@Override
-protected void onResume() {
-    super.onResume();
-    Log.d("Lifecycle", "onResume called");
-}
-
-@Override
-protected void onPause() {
-    super.onPause();
-    Log.d("Lifecycle", "onPause called");
-}
-
-@Override
-protected void onStop() {
-    super.onStop();
-    Log.d("Lifecycle", "onStop called");
-}
-
-@Override
-protected void onRestart() {
-    super.onRestart();
-    Log.d("Lifecycle", "onRestart called");
-}
-
-@Override
-protected void onDestroy() {
-    super.onDestroy();
-    Log.d("Lifecycle", "onDestroy called");
-}
-```
-
----
-
-## 6️⃣ سيناريوهات كبيرة مع Logcat
-
-### 6.1 الضغط على زر Back
-
-```java
-@Override
-public void onBackPressed() {
-    Log.d("LifecycleScenario", "Back button pressed");
-    userViewModel.saveUserToPrefs(this);
-    super.onBackPressed();
-}
-```
-
-### 6.2 تغيير الاتجاه
-
-```java
-@Override
-public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
-        Log.d("LifecycleScenario", "Orientation: LANDSCAPE");
-    } else {
-        Log.d("LifecycleScenario", "Orientation: PORTRAIT");
-    }
-}
-```
-
-### 6.3 تشغيل فيديو والانتقال بين التطبيقات
-
-```java
-@Override
-protected void onPause() {
-    super.onPause();
-    videoView.pause();
-    Log.d("LifecycleScenario", "Video paused onPause");
-}
-
-@Override
-protected void onResume() {
-    super.onResume();
-    videoView.start();
-    Log.d("LifecycleScenario", "Video resumed onResume");
-}
-```
-
-### 6.4 استقبال بيانات من الشبكة أثناء Lifecycle
-
-```java
-JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-    response -> {
-        Gson gson = new Gson();
-        User user = gson.fromJson(response.toString(), User.class);
-        Log.d("LifecycleScenario", "Fetched User: " + user.getName());
-
-        userViewModel.setUser(user);
-        Log.d("LifecycleScenario", "User updated in ViewModel");
-    },
-    error -> Log.e("LifecycleScenario", "Error fetching user", error)
-);
-queue.add(request);
-```
-
-### 6.5 إعادة فتح التطبيق بعد الضغط على Home
-
-```java
-@Override
-protected void onRestart() {
-    super.onRestart();
-    Log.d("LifecycleScenario", "App restarted");
-    userViewModel.loadUserFromPrefs(this);
-}
-```
-
----
-
-## 7️⃣ ملاحظات عملية
-
-1. طباعة كل خطوة في **Logcat** تساعد على تتبع مشاكل Lifecycle والشبكة.
-2. استخدم **ViewModel + LiveData** للحفاظ على البيانات عند تغييرات الشاشة.
-3. احفظ دائمًا البيانات المهمة قبل الخروج أو عند onPause.
-4. تعامل مع الشبكة و JSON بعناية لتجنب Crash.
-5. يمكن توسيع السيناريوهات لتشمل **Fragment Lifecycle** و **Multiple Activities**.
-
----
-
-
-# 📖 Android Lifecycle & Data Flow – Logcat Scenario
-
-## 🔹 1. فتح التطبيق لأول مرة
-
-```
-2025-12-07 14:00:00.000 D/Lifecycle: onCreate called
-2025-12-07 14:00:00.050 D/Lifecycle: onStart called
-2025-12-07 14:00:00.100 D/Lifecycle: onResume called
-2025-12-07 14:00:00.150 D/UserViewModel: Loaded User from SharedPreferences: null
-2025-12-07 14:00:00.200 D/Volley: Sending GET request to https://api.example.com/user
-2025-12-07 14:00:00.500 D/Volley: User from API: Ahmed, 25
-2025-12-07 14:00:00.550 D/UserViewModel: User updated in ViewModel
-2025-12-07 14:00:00.600 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ahmed","age":25}
-```
-
----
-
-## 🔹 2. المستخدم يضغط زر Home (App goes to background)
-
-```
-2025-12-07 14:05:00.000 D/Lifecycle: onPause called
-2025-12-07 14:05:00.050 D/Lifecycle: onStop called
-2025-12-07 14:05:00.100 D/UserViewModel: Video paused onPause
-```
-
----
-
-## 🔹 3. المستخدم يعود للتطبيق (onRestart + onResume)
-
-```
-2025-12-07 14:10:00.000 D/Lifecycle: onRestart called
-2025-12-07 14:10:00.050 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
-2025-12-07 14:10:00.100 D/Lifecycle: onStart called
-2025-12-07 14:10:00.150 D/Lifecycle: onResume called
-2025-12-07 14:10:00.200 D/UserViewModel: Video resumed onResume
-```
-
----
-
-## 🔹 4. المستخدم يغير اتجاه الشاشة (Orientation Change)
-
-```
-2025-12-07 14:15:00.000 D/LifecycleScenario: Orientation: PORTRAIT -> LANDSCAPE
-2025-12-07 14:15:00.050 D/Lifecycle: onPause called
-2025-12-07 14:15:00.100 D/Lifecycle: onStop called
-2025-12-07 14:15:00.150 D/Lifecycle: onDestroy called
-2025-12-07 14:15:00.200 D/Lifecycle: onCreate called
-2025-12-07 14:15:00.250 D/Lifecycle: onStart called
-2025-12-07 14:15:00.300 D/Lifecycle: onResume called
-2025-12-07 14:15:00.350 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
-```
-
----
-
-## 🔹 5. المستخدم يضغط زر Back للخروج
-
-```
-2025-12-07 14:20:00.000 D/LifecycleScenario: Back button pressed
-2025-12-07 14:20:00.050 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ahmed","age":25}
-2025-12-07 14:20:00.100 D/Lifecycle: onPause called
-2025-12-07 14:20:00.150 D/Lifecycle: onStop called
-2025-12-07 14:20:00.200 D/Lifecycle: onDestroy called
-```
-
----
-
-## 🔹 6. تشغيل فيديو، ثم استقبال مكالمة واردة
-
-```
-2025-12-07 14:25:00.000 D/Lifecycle: onPause called
-2025-12-07 14:25:00.050 D/UserViewModel: Video paused onPause
-2025-12-07 14:25:00.100 D/Lifecycle: onStop called
-```
-
-بعد انتهاء المكالمة:
-
-```
-2025-12-07 14:30:00.000 D/Lifecycle: onRestart called
-2025-12-07 14:30:00.050 D/Lifecycle: onStart called
-2025-12-07 14:30:00.100 D/Lifecycle: onResume called
-2025-12-07 14:30:00.150 D/UserViewModel: Video resumed onResume
-```
-
----
-
-## 🔹 7. تحديث بيانات من الشبكة أثناء تشغيل التطبيق
-
-```
-2025-12-07 14:35:00.000 D/Volley: Sending GET request to https://api.example.com/user
-2025-12-07 14:35:00.300 D/Volley: User from API: Ali, 30
-2025-12-07 14:35:00.350 D/UserViewModel: User updated in ViewModel
-2025-12-07 14:35:00.400 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ali","age":30}
-```
-
----
-
-## 🔹 8. التطبيق يعمل في الخلفية ويستقبل إشعار Network
-
-```
-2025-12-07 14:40:00.000 D/Lifecycle: onPause called
-2025-12-07 14:40:00.050 D/Lifecycle: onStop called
-2025-12-07 14:40:00.100 D/NotificationHandler: Received push notification
-2025-12-07 14:40:00.150 D/NotificationHandler: User data fetched in background: {"name":"Ali","age":30}
-```
-
----
-
-## 🔹 9. التطبيق يعود ويستأنف الفيديو + تحديث بيانات JSON من SharedPreferences
-
-```
-2025-12-07 14:45:00.000 D/Lifecycle: onRestart called
-2025-12-07 14:45:00.050 D/Lifecycle: onStart called
-2025-12-07 14:45:00.100 D/Lifecycle: onResume called
-2025-12-07 14:45:00.150 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ali","age":30}
-2025-12-07 14:45:00.200 D/UserViewModel: Video resumed onResume
-```
-
----
-## 🔹10.  التطبيق مفتوح أول مرة
-
-```
-2025-12-07 15:00:00.000 D/Lifecycle: onCreate called
-2025-12-07 15:00:00.050 D/Lifecycle: onStart called
-2025-12-07 15:00:00.100 D/Lifecycle: onResume called
-2025-12-07 15:00:00.150 D/UserViewModel: Loaded User from SharedPreferences: null
-2025-12-07 15:00:00.200 D/Volley: Sending GET request to https://api.example.com/user
-2025-12-07 15:00:00.500 D/Volley: User from API: Ahmed, 25
-2025-12-07 15:00:00.550 D/UserViewModel: User updated in ViewModel
-2025-12-07 15:00:00.600 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ahmed","age":25}
-2025-12-07 15:00:00.650 D/UserViewModel: Video started
-```
-
----
-
-## 🔹 11. المستخدم يضغط زر Home
-
-```
-2025-12-07 15:05:00.000 D/Lifecycle: onPause called
-2025-12-07 15:05:00.050 D/UserViewModel: Video paused
-2025-12-07 15:05:00.100 D/Lifecycle: onStop called
-```
-
----
-
-## 🔹 12.  أثناء وجود التطبيق في الخلفية – مكالمة واردة
-
-```
-2025-12-07 15:06:00.000 D/Lifecycle: (App is stopped)
-2025-12-07 15:06:00.050 D/PhoneCall: Incoming call detected
-2025-12-07 15:06:00.100 D/UserViewModel: Pausing background tasks / notifications
-```
-
----
-
-## 🔹 13.  المستخدم ينهي المكالمة ويعود للتطبيق
-
-```
-2025-12-07 15:10:00.000 D/Lifecycle: onRestart called
-2025-12-07 15:10:00.050 D/Lifecycle: onStart called
-2025-12-07 15:10:00.100 D/Lifecycle: onResume called
-2025-12-07 15:10:00.150 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
-2025-12-07 15:10:00.200 D/UserViewModel: Video resumed
-```
-
----
-
-## 🔹 14.  المستخدم يغير اتجاه الشاشة (Portrait → Landscape)
-
-```
-2025-12-07 15:15:00.000 D/LifecycleScenario: Orientation change detected
-2025-12-07 15:15:00.050 D/Lifecycle: onPause called
-2025-12-07 15:15:00.100 D/Lifecycle: onStop called
-2025-12-07 15:15:00.150 D/Lifecycle: onDestroy called
-2025-12-07 15:15:00.200 D/Lifecycle: onCreate called
-2025-12-07 15:15:00.250 D/Lifecycle: onStart called
-2025-12-07 15:15:00.300 D/Lifecycle: onResume called
-2025-12-07 15:15:00.350 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
-2025-12-07 15:15:00.400 D/UserViewModel: Video resumed
-```
-
----
-
-## 🔹 15.  المستخدم يضغط زر Back داخل Activity
-
-```
-2025-12-07 15:20:00.000 D/LifecycleScenario: Back button pressed
-2025-12-07 15:20:00.050 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ahmed","age":25}
-2025-12-07 15:20:00.100 D/Lifecycle: onPause called
-2025-12-07 15:20:00.150 D/Lifecycle: onStop called
-2025-12-07 15:20:00.200 D/Lifecycle: onDestroy called
-```
-
----
-
-## 🔹 16.  المستخدم يفتح التطبيق مرة ثانية، البيانات محدثة من الشبكة
-
-```
-2025-12-07 15:25:00.000 D/Lifecycle: onCreate called
-2025-12-07 15:25:00.050 D/Lifecycle: onStart called
-2025-12-07 15:25:00.100 D/Lifecycle: onResume called
-2025-12-07 15:25:00.150 D/UserViewModel: Loaded User from SharedPreferences: {"name":"Ahmed","age":25}
-2025-12-07 15:25:00.200 D/Volley: Sending GET request to https://api.example.com/user
-2025-12-07 15:25:00.500 D/Volley: User from API: Ali, 30
-2025-12-07 15:25:00.550 D/UserViewModel: User updated in ViewModel
-2025-12-07 15:25:00.600 D/UserViewModel: Saved User to SharedPreferences: {"name":"Ali","age":30}
-```
-
----
-
-```
-          onCreate
-             |
-             v
-          onStart
-             |
-             v
-          onResume -------------------------+
-             |                               |
-             |                               |
-             v                               |
-          onPause                             |
-             |                               |
-             v                               |
-          onStop ----------------------------+
-             |
-             v
-          onRestart
-             |
-             v
-          onStart
-             |
-             v
-          onResume
-             |
-          (Back/Home/Orientation/Call)
-             |
-         onPause -> onStop -> onDestroy
-```
----
-
-# 📚 شرح RecyclerView Adapter + ViewHolder + Object + XML
-
----
-
-## 1️⃣ ليش نستخدم **RecyclerView + Adapter + ViewHolder**
-
-### RecyclerView:
-
-* هو عنصر عرض **قابل للتمرير بكفاءة عالية**.
-* يعرض قائمة من العناصر (List) أو شبكة (Grid).
-* يقوم **إعادة استخدام Views** لتوفير أداء أفضل بدل إنشاء كل عنصر من جديد.
-
-### Adapter:
-
-* هو الوسيط بين **مصدر البيانات (Data Source)** و **RecyclerView**.
-* مسؤول عن:
-
-  1. إنشاء العناصر (`onCreateViewHolder`)
-  2. ربط البيانات بالعنصر (`onBindViewHolder`)
-  3. معرفة عدد العناصر (`getItemCount`)
-
-### ViewHolder:
-
-* يمثل **عنصر واحد في القائمة**.
-* يحتوي على **References لكل View داخل العنصر** (TextView, ImageView, إلخ).
-* سبب استخدامه:
-
-  * تحسين الأداء لأننا لا نعيد استدعاء `findViewById` لكل مرة.
-  * كل ViewHolder مرتبط بعنصر واحد فقط، ويعاد استخدامه أثناء التمرير.
-
----
-
-## 2️⃣ Object + XML Layout
-
-### Object (Model Class)
-
-* يمثل **البنية المنطقية للبيانات**.
-* مثال: `User` يحتوي على `name, age, email`.
-* كل عنصر في RecyclerView سيمثل **كائن User واحد**.
-
-```java
-public class User {
-    private String name;
-    private int age;
-    private String email;
-}
-```
-
-### XML Layout
-
-* يمثل **المظهر المرئي لكل عنصر** في القائمة.
-* لماذا منفصل؟:
-
-  1. فصل الـ **UI** عن البيانات والـ **logic**.
-  2. يمكن إعادة استخدامه لعناصر متعددة.
-  3. يمكن التعديل على المظهر بدون تغيير الكود.
-
-مثال: `item_user.xml`
-
-```xml
-<LinearLayout
-    android:orientation="vertical"
-    android:padding="12dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <TextView android:id="@+id/tvName"/>
-    <TextView android:id="@+id/tvAge"/>
-    <TextView android:id="@+id/tvEmail"/>
-</LinearLayout>
-```
-
----
-
-## 3️⃣ العلاقة بين Object + Adapter + ViewHolder + XML
-
-```
-[User Object]  -> [Adapter] -> [ViewHolder] -> [XML Layout] -> [RecyclerView Display]
-```
-
-### كيف تعمل؟
-
-1. Adapter يأخذ **قائمة من Objects** (مثلاً List<User>)
-2. Adapter ينشئ **ViewHolder** لكل عنصر
-3. ViewHolder يحمل **References** للـ Views في XML
-4. Adapter يربط بيانات كل Object بالـ Views (`onBindViewHolder`)
-5. RecyclerView يعرض العناصر، ويعيد استخدام ViewHolders أثناء التمرير
-
----
-
-## 4️⃣ مثال عملي:
-
-### Adapter + ViewHolder:
-
-```java
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
-    private List<User> userList;
-
-    public UserAdapter(List<User> userList) { this.userList = userList; }
-
-    @NonNull
     @Override
-    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_user, parent, false);
-        return new UserViewHolder(view);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Log.d(TAG, "onCreate called");
+
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userViewModel.loadUserFromPrefs(this);
+
+        // Observe LiveData
+        userViewModel.getUser().observe(this, user -> {
+            if(user != null) {
+                Log.d(TAG, "User updated: " + user.getName());
+                // Update UI
+            }
+        });
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        User user = userList.get(position);
-        holder.tvName.setText(user.getName());
-        holder.tvAge.setText("Age: " + user.getAge());
-        holder.tvEmail.setText(user.getEmail());
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart called");
     }
 
     @Override
-    public int getItemCount() { return userList.size(); }
-
-    static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvAge, tvEmail;
-        public UserViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvName = itemView.findViewById(R.id.tvName);
-            tvAge = itemView.findViewById(R.id.tvAge);
-            tvEmail = itemView.findViewById(R.id.tvEmail);
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume called");
+        if(videoView != null) {
+            videoView.start();
+            Log.d(TAG, "Video resumed");
         }
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause called");
+        if(videoView != null) {
+            videoView.pause();
+            Log.d(TAG, "Video paused");
+        }
+        userViewModel.saveUserToPrefs(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop called");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "onRestart called");
+        userViewModel.loadUserFromPrefs(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy called");
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+            Log.d(TAG, "Orientation: LANDSCAPE");
+        } else {
+            Log.d(TAG, "Orientation: PORTRAIT");
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "Back button pressed");
+        userViewModel.saveUserToPrefs(this);
+        super.onBackPressed();
+    }
 }
 ```
 
-### RecyclerView في Activity:
-
-```java
-RecyclerView recyclerView = findViewById(R.id.recyclerView);
-recyclerView.setLayoutManager(new LinearLayoutManager(this));
-UserAdapter adapter = new UserAdapter(users);
-recyclerView.setAdapter(adapter);
+### Lifecycle Flow Diagram
+```
+onCreate
+   ↓
+onStart
+   ↓
+onResume  ← (App Running)
+   ↓
+onPause   → (Home pressed / Call incoming)
+   ↓
+onStop    → (App not visible)
+   ↓
+onRestart → (Return to app)
+   ↓
+onStart
+   ↓
+onResume
+   ↓
+onPause   → (Back pressed / finish())
+   ↓
+onStop
+   ↓
+onDestroy
 ```
 
 ---
 
+## <a id="recyclerview"></a>6️⃣ RecyclerView + Adapter + ViewHolder
 
-# 📖 XML Object + Java Object + Adapter + ViewHolder
-
-## 🔹 1️⃣ XML Object – Users
-
+### item_user.xml
 ```xml
-<USERS>
-    <USER>
-        <NAME>Ahmed</NAME>
-        <AGE>25</AGE>
-        <EMAIL>ahmed@example.com</EMAIL>
-        <ADDRESS>
-            <STREET>123 Main St</STREET>
-            <CITY>Ramallah</CITY>
-            <ZIP>12345</ZIP>
-        </ADDRESS>
-        <PHONES>
-            <PHONE>0591234567</PHONE>
-            <PHONE>0597654321</PHONE>
-        </PHONES>
-    </USER>
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="8dp">
 
-    <USER>
-        <NAME>Ali</NAME>
-        <AGE>30</AGE>
-        <EMAIL>ali@example.com</EMAIL>
-        <ADDRESS>
-            <STREET>456 Side St</STREET>
-            <CITY>Jerusalem</CITY>
-            <ZIP>67890</ZIP>
-        </ADDRESS>
-        <PHONES>
-            <PHONE>0593334444</PHONE>
-        </PHONES>
-    </USER>
-</USERS>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tvEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/tvCity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="City"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/tvPhones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phones"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
 ```
 
-**شرح :**
-
-* `<USERS>` → القائمة الكاملة للمستخدمين
-* `<USER>` → كائن مستخدم واحد
-* `<ADDRESS>` → كائن داخلي يحتوي على العنوان
-* `<PHONES>` → قائمة أرقام الهاتف
-* هذا التصميم مشابه تمامًا لنموذج JSON Object، فقط بصيغة XML
-
----
-
-## 🔹 2️⃣ Java Object – User + Address
-
-```java
-public class Address {
-    private String street;
-    private String city;
-    private String zip;
-    // getters & setters
-}
-
-public class User {
-    private String name;
-    private int age;
-    private String email;
-    private Address address;
-    private List<String> phones;
-    // getters & setters
-}
-```
-
-**شرح :**
-
-* يعكس **هيكل الـ XML**
-* يمكن قراءة البيانات من XML وتحويلها إلى هذه الكائنات
-
----
-
-## 🔹 3️⃣ Adapter + ViewHolder
-
+### UserAdapter.java
 ```java
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     private List<User> userList;
+    private OnUserClickListener listener;
 
-    public UserAdapter(List<User> userList) { this.userList = userList; }
+    public interface OnUserClickListener {
+        void onUserClick(User user);
+    }
+
+    public UserAdapter(List<User> userList, OnUserClickListener listener) {
+        this.userList = userList;
+        this.listener = listener;
+    }
 
     @NonNull
     @Override
@@ -1862,17 +1579,22 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = userList.get(position);
-        holder.tvName.setText(user.getName());
-        holder.tvEmail.setText(user.getEmail());
-        holder.tvCity.setText(user.getAddress().getCity());
-        holder.tvPhones.setText(TextUtils.join(", ", user.getPhones()));
+        holder.bind(user, listener);
     }
 
     @Override
-    public int getItemCount() { return userList.size(); }
+    public int getItemCount() {
+        return userList != null ? userList.size() : 0;
+    }
+
+    public void updateList(List<User> newList) {
+        this.userList = newList;
+        notifyDataSetChanged();
+    }
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvEmail, tvCity, tvPhones;
+
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvName);
@@ -1880,382 +1602,693 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             tvCity = itemView.findViewById(R.id.tvCity);
             tvPhones = itemView.findViewById(R.id.tvPhones);
         }
+
+        public void bind(User user, OnUserClickListener listener) {
+            tvName.setText(user.getName());
+            tvEmail.setText(user.getEmail());
+            
+            if(user.getAddress() != null) {
+                tvCity.setText(user.getAddress().getCity());
+            }
+            
+            if(user.getPhones() != null && !user.getPhones().isEmpty()) {
+                tvPhones.setText(TextUtils.join(", ", user.getPhones()));
+            }
+
+            itemView.setOnClickListener(v -> listener.onUserClick(user));
+        }
     }
 }
 ```
 
-**شرح :**
+### Setup RecyclerView in Activity
+```java
+RecyclerView recyclerView = findViewById(R.id.recyclerView);
+recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-* **Adapter**: يربط البيانات من Java Objects إلى RecyclerView
-* **ViewHolder**: يحافظ على References للـ Views لتحسين الأداء
-* عند تمرير العناصر، RecyclerView **يعيد استخدام ViewHolders** لتوفير الذاكرة
+UserAdapter adapter = new UserAdapter(users, user -> {
+    Toast.makeText(this, "Clicked: " + user.getName(), Toast.LENGTH_SHORT).show();
+    // Open detail activity
+    Intent intent = new Intent(MainActivity.this, UserDetailActivity.class);
+    intent.putExtra("user", user);
+    startActivity(intent);
+});
 
----
+recyclerView.setAdapter(adapter);
 
-## 🔹 4️⃣ XML Layout لكل عنصر (`item_user.xml`)
-
-```xml
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp"
-    android:background="?android:attr/selectableItemBackground">
-
-    <TextView android:id="@+id/tvName" android:textSize="18sp" android:textStyle="bold"/>
-    <TextView android:id="@+id/tvEmail"/>
-    <TextView android:id="@+id/tvCity"/>
-    <TextView android:id="@+id/tvPhones"/>
-</LinearLayout>
+// Observe ViewModel
+userViewModel.getUserList().observe(this, users -> {
+    adapter.updateList(users);
+});
 ```
 
-**شرح :**
-
-* كل عنصر User يعرض **Name, Email, City, Phones**
-* XML منفصل عن الكود لضمان **إعادة الاستخدام والفصل بين UI وLogic**
-
 ---
 
-## 🔹 5️⃣ ملاحظات مهمة
+## <a id="intents"></a>7️⃣ Intents & Navigation
 
-1. **XML Object** مشابه جدًا للـ JSON Object، الفرق فقط في الصياغة
-2. **Adapter + ViewHolder** يحافظ على الأداء أثناء عرض القائمة
-3. **Java Object** يمثل البيانات بشكل منطقي، ويستعمل مع أي مصدر: JSON أو XML
+### Explicit Intent Examples
 
----
-## 📌 شرح Intents في Android
-1. ما هو Intent؟
-
-هو رسالة داخلية في Android تقول
-"أريد أن أفعل هذا الشيء، هل هناك مكون يمكنه التعامل معه؟"
-
-
-يمكن استخدامه لفتح Activity، بدء Service، أو إرسال Broadcast.
-
----
-
-2. أنواع Intents
-
-
-### 1️⃣ **Explicit Intents (صريح)**
-
-* تستخدم للتنقل داخل تطبيقك بين شاشات (Activities) أو لبدء Services.
-
-**أمثلة:**
-
-**أ) فتح Activity أخرى:**
-
+#### Open Another Activity
 ```java
 Intent intent = new Intent(MainActivity.this, SecondActivity.class);
 startActivity(intent);
 ```
 
-**ب) بدء خدمة:**
-
+#### Pass Data Between Activities
 ```java
-Intent intent = new Intent(this, MyService.class);
-startService(intent);
-```
-
-**ج) فتح Activity مع تمرير بيانات:**
-
-```java
+// Sender Activity
 Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-intent.putExtra("username", "Ayman");
+intent.putExtra("username", "Ahmed");
 intent.putExtra("age", 25);
+intent.putExtra("user", userObject); // Serializable
 startActivity(intent);
+
+// Receiver Activity
+String username = getIntent().getStringExtra("username");
+int age = getIntent().getIntExtra("age", 0);
+User user = (User) getIntent().getSerializableExtra("user");
 ```
 
----
-
-### 2️⃣ **Implicit Intents (ضمني)**
-
-* تستخدم لطلب Android أو التطبيقات الأخرى القيام بعمل محدد بدون معرفة المكون مباشرة.
-
-**أمثلة:**
-
-**أ) فتح رابط ويب:**
-
+#### Start Activity for Result (Old Way - Deprecated)
 ```java
-Intent intent = new Intent(Intent.ACTION_VIEW);
-intent.setData(Uri.parse("https://www.google.com"));
-startActivity(intent);
-```
-
-**ب) مشاركة نص:**
-
-```java
-Intent intent = new Intent(Intent.ACTION_SEND);
-intent.setType("text/plain");
-intent.putExtra(Intent.EXTRA_TEXT, "Hello from my app!");
-startActivity(Intent.createChooser(intent, "Share via"));
-```
-
-**ج) فتح تطبيق البريد لإرسال رسالة:**
-
-```java
-Intent intent = new Intent(Intent.ACTION_SENDTO);
-intent.setData(Uri.parse("mailto:example@gmail.com"));
-intent.putExtra(Intent.EXTRA_SUBJECT, "Subject here");
-intent.putExtra(Intent.EXTRA_TEXT, "Body of the email");
-startActivity(intent);
-```
-
-**د) فتح جهات الاتصال:**
-
-```java
-Intent intent = new Intent(Intent.ACTION_PICK);
-intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
-startActivity(intent);
-```
-
----
-
-### 3️⃣ **Intent Filter في Manifest**
-
-* يحدد لأي أنواع Intents يمكن للـ Activity أن تتعامل معها.
-
-**أمثلة:**
-
-**أ) استقبال نصوص وصور:**
-
-```xml
-<activity android:name=".ShareActivity">
-    <intent-filter>
-        <action android:name="android.intent.action.SEND"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <data android:mimeType="text/plain"/>
-        <data android:mimeType="image/*"/>
-    </intent-filter>
-</activity>
-```
-
-**ب) استقبال روابط ويب (فتح المتصفح داخليًا أو مشاركة الرابط):**
-
-```xml
-<activity android:name=".WebActivity">
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="https" android:host="www.example.com"/>
-    </intent-filter>
-</activity>
-```
-
----
-
-### 4️⃣ **تمرير البيانات مع putExtra()**
-
-**أمثلة:**
-
-**أ) تمرير نص:**
-
-```java
-intent.putExtra(Intent.EXTRA_TEXT, "Hello World");
-```
-
-**ب) تمرير موضوع (subject):**
-
-```java
-intent.putExtra(Intent.EXTRA_SUBJECT, "Greetings");
-```
-
-**ج) تمرير أرقام أو boolean:**
-
-```java
-intent.putExtra("score", 95);
-intent.putExtra("isPremiumUser", true);
-```
-
-**د) تمرير Arrays أو Serializable Objects:**
-
-```java
-intent.putExtra("names", new String[]{"Ali", "Sara", "Lina"});
-intent.putExtra("user", userObject); // userObject implements Serializable
-```
-
----
-
-### 5️⃣ **startActivityForResult() + onActivityResult()**
-
-* تستخدم لاسترجاع بيانات من Activity أخرى.
-
-**أمثلة:**
-
-**أ) إرسال طلب:**
-
-```java
+// MainActivity.java - OLD METHOD (Still works but deprecated)
 private static final int REQUEST_CODE = 1;
 
+// Send Request
 Intent intent = new Intent(MainActivity.this, SecondActivity.class);
 startActivityForResult(intent, REQUEST_CODE);
-```
 
-**ب) استقبال النتيجة:**
-
-```java
+// Receive Result
 @Override
 protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     if(requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-        String result = data.getStringExtra("resultKey");
+        String result = data.getStringExtra("result");
         Toast.makeText(this, "Result: " + result, Toast.LENGTH_SHORT).show();
     }
 }
-```
 
-**ج) إرجاع البيانات من SecondActivity:**
-
-```java
+// SecondActivity.java - Return Result
 Intent returnIntent = new Intent();
-returnIntent.putExtra("resultKey", "This is the result");
+returnIntent.putExtra("result", "Success");
 setResult(RESULT_OK, returnIntent);
 finish();
 ```
 
----
+#### Activity Result API (New Way - Recommended)
+```java
+// MainActivity.java - NEW METHOD
+private ActivityResultLauncher<Intent> activityResultLauncher;
 
-### 6️⃣ **ملاحظات مهمة قبل الكود**
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
 
-* **Explicit Intent**: تحدد المكون مباشرة، لا يحتاج Intent Filter.
-* **Implicit Intent**: يعتمد على Action وData، يحتاج Intent Filter في Manifest.
-* **DEFAULT category**: ضروري للـ Implicit Intents.
-* **putExtra()**: لتمرير البيانات بين Activities.
-* **startActivityForResult()**: لاسترجاع بيانات من Activity أخرى.
+    // Register the launcher
+    activityResultLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Intent data = result.getData();
+                if (data != null) {
+                    String resultString = data.getStringExtra("result");
+                    Toast.makeText(this, "Result: " + resultString, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    );
 
----
+    // Launch activity when needed
+    Button btnLaunch = findViewById(R.id.btnLaunch);
+    btnLaunch.setOnClickListener(v -> {
+        Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+        activityResultLauncher.launch(intent);
+    });
+}
 
-## **1️⃣ ما هو Action في Intent؟**
+// SecondActivity.java - Return Result (same as before)
+Intent returnIntent = new Intent();
+returnIntent.putExtra("result", "Success");
+setResult(RESULT_OK, returnIntent);
+finish();
+```
 
-* **Action** يحدد ما تريد أن يحدث عند إرسال الـ Intent.
-* هو **سطر التعريف** لما تريد من النظام أو أي Activity القيام به.
-* مثال: `Intent.ACTION_VIEW` → افتح شيء للعرض، أو `Intent.ACTION_SEND` → شارك شيئًا.
+#### Multiple Activity Results
+```java
+// MainActivity.java
+private ActivityResultLauncher<Intent> editProfileLauncher;
+private ActivityResultLauncher<Intent> selectImageLauncher;
 
----
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    
+    // Edit Profile Launcher
+    editProfileLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                String name = result.getData().getStringExtra("name");
+                String email = result.getData().getStringExtra("email");
+                Log.d("Result", "Name: " + name + ", Email: " + email);
+            }
+        }
+    );
 
-## **2️⃣ أشهر أنواع الـ Actions**
+    // Select Image Launcher
+    selectImageLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Uri imageUri = result.getData().getData();
+                imageView.setImageURI(imageUri);
+            }
+        }
+    );
+}
+```
 
-### **أ) ACTION_VIEW**
+#### Pick Contact Example (Complete)
+```java
+// MainActivity.java
+private static final int PICK_CONTACT_REQUEST = 100;
+private ActivityResultLauncher<Intent> pickContactLauncher;
 
-* لعرض محتوى للمستخدم (رابط ويب، صورة، ملف).
-* مثال: فتح موقع ويب:
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    
+    // NEW WAY - Recommended
+    pickContactLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri contactUri = result.getData().getData();
+                String[] projection = {ContactsContract.Contacts.DISPLAY_NAME};
+                Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                    String name = cursor.getString(nameIndex);
+                    Toast.makeText(this, "Selected: " + name, Toast.LENGTH_SHORT).show();
+                    cursor.close();
+                }
+            }
+        }
+    );
 
+    // Launch contact picker
+    Button btnPickContact = findViewById(R.id.btnPickContact);
+    btnPickContact.setOnClickListener(v -> {
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        pickContactLauncher.launch(intent);
+    });
+}
+
+// OLD WAY (for comparison)
+Button btnPickContactOld = findViewById(R.id.btnPickContactOld);
+btnPickContactOld.setOnClickListener(v -> {
+    Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+    startActivityForResult(intent, PICK_CONTACT_REQUEST);
+});
+
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == PICK_CONTACT_REQUEST && resultCode == RESULT_OK) {
+        // Handle contact selection (same as above)
+    }
+}
+```
+
+#### Take Photo Example
+```java
+// MainActivity.java
+private ActivityResultLauncher<Intent> takePictureLauncher;
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    
+    takePictureLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Bundle extras = result.getData().getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                imageView.setImageBitmap(imageBitmap);
+            }
+        }
+    );
+
+    Button btnTakePhoto = findViewById(R.id.btnTakePhoto);
+    btnTakePhoto.setOnClickListener(v -> {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureLauncher.launch(takePictureIntent);
+    });
+}
+```
+
+### Implicit Intent Examples
+
+#### Open Web Browser
 ```java
 Intent intent = new Intent(Intent.ACTION_VIEW);
 intent.setData(Uri.parse("https://www.google.com"));
 startActivity(intent);
 ```
 
----
-
-### **ب) ACTION_SEND**
-
-* لمشاركة نص أو صورة أو ملفات بين التطبيقات.
-* مثال: مشاركة نص:
-
+#### Share Text
 ```java
 Intent intent = new Intent(Intent.ACTION_SEND);
 intent.setType("text/plain");
-intent.putExtra(Intent.EXTRA_TEXT, "Hello from my app!");
+intent.putExtra(Intent.EXTRA_TEXT, "Check out this app!");
 startActivity(Intent.createChooser(intent, "Share via"));
 ```
 
----
+#### Make Phone Call (Requires Permission)
+```java
+Intent intent = new Intent(Intent.ACTION_CALL);
+intent.setData(Uri.parse("tel:123456789"));
+if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) 
+    == PackageManager.PERMISSION_GRANTED) {
+    startActivity(intent);
+}
+```
 
-### **ج) ACTION_DIAL**
-
-* لفتح تطبيق الهاتف مع رقم محدد، بدون الاتصال مباشرة.
-* مثال:
-
+#### Open Dialer
 ```java
 Intent intent = new Intent(Intent.ACTION_DIAL);
 intent.setData(Uri.parse("tel:123456789"));
 startActivity(intent);
 ```
 
----
-
-### **د) ACTION_CALL**
-
-* الاتصال مباشرة برقم (يحتاج صلاحيات `CALL_PHONE`).
-* مثال:
-
-```java
-Intent intent = new Intent(Intent.ACTION_CALL);
-intent.setData(Uri.parse("tel:123456789"));
-startActivity(intent);
-```
-
----
-
-### **هـ) ACTION_PICK**
-
-* اختيار عنصر من قاعدة بيانات أو مجلد (مثل جهات الاتصال أو الصور).
-* مثال: اختيار جهة اتصال:
-
-```java
-Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-startActivityForResult(intent, REQUEST_CODE);
-```
-
----
-
-### **و) ACTION_SENDTO**
-
-* إرسال رسالة بريد إلكتروني أو رسالة قصيرة SMS.
-* مثال لإرسال بريد إلكتروني:
-
+#### Send Email
 ```java
 Intent intent = new Intent(Intent.ACTION_SENDTO);
 intent.setData(Uri.parse("mailto:example@gmail.com"));
-intent.putExtra(Intent.EXTRA_SUBJECT, "Subject here");
-intent.putExtra(Intent.EXTRA_TEXT, "Body of the email");
+intent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
+intent.putExtra(Intent.EXTRA_TEXT, "Email body");
 startActivity(intent);
 ```
 
----
-
-### **ز) ACTION_EDIT**
-
-* تعديل بيانات أو محتوى موجود.
-* مثال: تعديل جهة اتصال:
-
+#### Pick Contact
 ```java
-Intent intent = new Intent(Intent.ACTION_EDIT);
-intent.setData(Uri.parse("content://contacts/people/1"));
-startActivity(intent);
+// NEW WAY - Using Activity Result API
+private ActivityResultLauncher<Intent> pickContactLauncher;
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    
+    pickContactLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri contactUri = result.getData().getData();
+                // Process contact
+            }
+        }
+    );
+}
+
+Button btnPickContact = findViewById(R.id.btnPickContact);
+btnPickContact.setOnClickListener(v -> {
+    Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+    pickContactLauncher.launch(intent);
+});
+```
+
+### Intent Actions Reference
+
+| Action | Purpose | Example |
+|--------|---------|---------|
+| `ACTION_VIEW` | View content | Open URL, image, file |
+| `ACTION_SEND` | Share content | Share text, image |
+| `ACTION_DIAL` | Open dialer | Show phone dialer |
+| `ACTION_CALL` | Make call | Direct call (needs permission) |
+| `ACTION_SENDTO` | Send message | Email, SMS |
+| `ACTION_PICK` | Pick item | Select contact, photo |
+| `ACTION_EDIT` | Edit data | Edit contact |
+| `ACTION_MAIN` | Main entry | Launcher activity |
+
+---
+
+## <a id="scenarios"></a>8️⃣ Practical Scenarios with Logcat
+
+### Scenario 1: First App Launch
+```
+2025-12-07 14:00:00.000 D/Lifecycle: onCreate called
+2025-12-07 14:00:00.050 D/Lifecycle: onStart called
+2025-12-07 14:00:00.100 D/Lifecycle: onResume called
+2025-12-07 14:00:00.150 D/UserViewModel: No saved user data found
+2025-12-07 14:00:00.200 D/Volley: Sending GET request
+2025-12-07 14:00:00.500 D/Volley: User from API: Ahmed, Age: 25
+2025-12-07 14:00:00.550 D/UserViewModel: User set: Ahmed
+2025-12-07 14:00:00.600 D/UserViewModel: Saved User to SharedPreferences
+```
+
+### Scenario 2: Press Home Button
+```
+2025-12-07 14:05:00.000 D/Lifecycle: onPause called
+2025-12-07 14:05:00.050 D/UserViewModel: Saved User to SharedPreferences
+2025-12-07 14:05:00.100 D/Lifecycle: onStop called
+```
+
+### Scenario 3: Return to App
+```
+2025-12-07 14:10:00.000 D/Lifecycle: onRestart called
+2025-12-07 14:10:00.050 D/UserViewModel: Loaded User from SharedPreferences
+2025-12-07 14:10:00.100 D/Lifecycle: onStart called
+2025-12-07 14:10:00.150 D/Lifecycle: onResume called
+```
+
+### Scenario 4: Orientation Change
+```
+2025-12-07 14:15:00.000 D/Lifecycle: onPause called
+2025-12-07 14:15:00.050 D/Lifecycle: onStop called
+2025-12-07 14:15:00.100 D/Lifecycle: onDestroy called
+2025-12-07 14:15:00.150 D/Lifecycle: onCreate called
+2025-12-07 14:15:00.200 D/Lifecycle: onStart called
+2025-12-07 14:15:00.250 D/Lifecycle: onResume called
+2025-12-07 14:15:00.300 D/Lifecycle: Orientation: LANDSCAPE
+2025-12-07 14:15:00.350 D/UserViewModel: Loaded User from SharedPreferences
+```
+
+### Scenario 5: Press Back Button
+```
+2025-12-07 14:20:00.000 D/Lifecycle: Back button pressed
+2025-12-07 14:20:00.050 D/UserViewModel: Saved User to SharedPreferences
+2025-12-07 14:20:00.100 D/Lifecycle: onPause called
+2025-12-07 14:20:00.150 D/Lifecycle: onStop called
+2025-12-07 14:20:00.200 D/Lifecycle: onDestroy called
+```
+
+### Scenario 6: Network Update While Running
+```
+2025-12-07 14:25:00.000 D/Volley: Sending GET request
+2025-12-07 14:25:00.300 D/Volley: User from API: Ali, Age: 30
+2025-12-07 14:25:00.350 D/UserViewModel: User set: Ali
+2025-12-07 14:25:00.400 D/UserViewModel: Saved User to SharedPreferences
+```
+
+### Scenario 7: Video Playing + Incoming Call
+```
+2025-12-07 14:30:00.000 D/Lifecycle: onResume called
+2025-12-07 14:30:00.050 D/VideoView: Video started playing
+2025-12-07 14:30:00.100 D/Lifecycle: Video resumed
+2025-12-07 14:32:00.000 D/PhoneCall: Incoming call detected
+2025-12-07 14:32:00.050 D/Lifecycle: onPause called
+2025-12-07 14:32:00.100 D/VideoView: Video paused
+2025-12-07 14:32:00.150 D/UserViewModel: Saved User to SharedPreferences
+2025-12-07 14:32:00.200 D/Lifecycle: onStop called
+--- Call Ends ---
+2025-12-07 14:35:00.000 D/Lifecycle: onRestart called
+2025-12-07 14:35:00.050 D/UserViewModel: Loaded User from SharedPreferences
+2025-12-07 14:35:00.100 D/Lifecycle: onStart called
+2025-12-07 14:35:00.150 D/Lifecycle: onResume called
+2025-12-07 14:35:00.200 D/VideoView: Video resumed from pause
+```
+
+### Scenario 8: Navigate to Second Activity and Back
+```
+2025-12-07 14:40:00.000 D/MainActivity: User clicks button to open ProfileActivity
+2025-12-07 14:40:00.050 D/Intent: Starting ProfileActivity with User data
+2025-12-07 14:40:00.100 D/MainActivity-Lifecycle: onPause called
+2025-12-07 14:40:00.150 D/MainActivity-Lifecycle: onStop called
+2025-12-07 14:40:00.200 D/ProfileActivity-Lifecycle: onCreate called
+2025-12-07 14:40:00.250 D/ProfileActivity-Lifecycle: onStart called
+2025-12-07 14:40:00.300 D/ProfileActivity-Lifecycle: onResume called
+2025-12-07 14:40:00.350 D/ProfileActivity: Received User: Ahmed, Age: 25
+--- User presses Back ---
+2025-12-07 14:45:00.000 D/ProfileActivity-Lifecycle: onPause called
+2025-12-07 14:45:00.050 D/MainActivity-Lifecycle: onRestart called
+2025-12-07 14:45:00.100 D/MainActivity-Lifecycle: onStart called
+2025-12-07 14:45:00.150 D/MainActivity-Lifecycle: onResume called
+2025-12-07 14:45:00.200 D/ProfileActivity-Lifecycle: onStop called
+2025-12-07 14:45:00.250 D/ProfileActivity-Lifecycle: onDestroy called
+```
+
+### Scenario 9: Low Memory - System Kills App in Background
+```
+2025-12-07 14:50:00.000 D/Lifecycle: onPause called
+2025-12-07 14:50:00.050 D/UserViewModel: Saved User to SharedPreferences
+2025-12-07 14:50:00.100 D/Lifecycle: onStop called
+2025-12-07 14:52:00.000 D/System: Low memory detected
+2025-12-07 14:52:00.050 D/System: Killing MainActivity process
+2025-12-07 14:52:00.100 D/Lifecycle: onDestroy called (not guaranteed to be called)
+--- User returns to app ---
+2025-12-07 14:55:00.000 D/Lifecycle: onCreate called (fresh start)
+2025-12-07 14:55:00.050 D/Lifecycle: onStart called
+2025-12-07 14:55:00.100 D/Lifecycle: onResume called
+2025-12-07 14:55:00.150 D/UserViewModel: Loaded User from SharedPreferences
+2025-12-07 14:55:00.200 D/UserViewModel: User restored: Ahmed, Age: 25
+```
+
+### Scenario 10: RecyclerView Data Update
+```
+2025-12-07 15:00:00.000 D/MainActivity: User clicks Refresh button
+2025-12-07 15:00:00.050 D/Volley: Sending GET request to /users endpoint
+2025-12-07 15:00:00.100 D/RecyclerView: Showing loading indicator
+2025-12-07 15:00:00.400 D/Volley: Fetched 10 users from API
+2025-12-07 15:00:00.450 D/UserViewModel: User list updated: 10 users
+2025-12-07 15:00:00.500 D/UserViewModel: Saved User List to SharedPreferences
+2025-12-07 15:00:00.550 D/UserAdapter: notifyDataSetChanged called
+2025-12-07 15:00:00.600 D/RecyclerView: Displaying 10 items
+2025-12-07 15:00:00.650 D/RecyclerView: Hiding loading indicator
+```
+
+### Scenario 11: Share Text to Another App
+```
+2025-12-07 15:05:00.000 D/MainActivity: User clicks Share button
+2025-12-07 15:05:00.050 D/Intent: ACTION_SEND with text/plain type
+2025-12-07 15:05:00.100 D/Intent: Extra text: "Check out this app!"
+2025-12-07 15:05:00.150 D/System: Showing chooser dialog
+2025-12-07 15:05:00.200 D/MainActivity-Lifecycle: onPause called
+2025-12-07 15:05:05.000 D/System: User selected WhatsApp
+2025-12-07 15:05:05.050 D/WhatsApp: Received shared text
+--- User shares and returns ---
+2025-12-07 15:05:10.000 D/MainActivity-Lifecycle: onResume called
+```
+
+### Scenario 12: Network Error Handling
+```
+2025-12-07 15:10:00.000 D/Volley: Sending GET request
+2025-12-07 15:10:00.050 D/NetworkMonitor: No internet connection
+2025-12-07 15:10:00.100 E/Volley: Error: NetworkError
+2025-12-07 15:10:00.150 D/MainActivity: Showing error toast
+2025-12-07 15:10:00.200 D/UserViewModel: Loading cached data from SharedPreferences
+2025-12-07 15:10:00.250 D/UserViewModel: Loaded User: Ahmed, Age: 25 (offline)
+2025-12-07 15:10:00.300 D/MainActivity: Displaying offline indicator
+```
+
+### Scenario 13: Pick Contact and Display
+```
+2025-12-07 15:15:00.000 D/MainActivity: User clicks Pick Contact button
+2025-12-07 15:15:00.050 D/Intent: ACTION_PICK - Contacts
+2025-12-07 15:15:00.100 D/ActivityResultLauncher: Launching contact picker
+2025-12-07 15:15:00.150 D/MainActivity-Lifecycle: onPause called
+2025-12-07 15:15:00.200 D/MainActivity-Lifecycle: onStop called
+2025-12-07 15:15:00.250 D/ContactsApp: Contact picker opened
+--- User selects contact ---
+2025-12-07 15:15:05.000 D/ActivityResultLauncher: Result received - RESULT_OK
+2025-12-07 15:15:05.050 D/MainActivity-Lifecycle: onRestart called
+2025-12-07 15:15:05.100 D/MainActivity-Lifecycle: onStart called
+2025-12-07 15:15:05.150 D/MainActivity-Lifecycle: onResume called
+2025-12-07 15:15:05.200 D/ContactPicker: Selected contact: Ali Mohammed
+2025-12-07 15:15:05.250 D/MainActivity: Displaying contact name: Ali Mohammed
+```
+
+### Scenario 14: Form Input + Activity Result
+```
+2025-12-07 15:20:00.000 D/MainActivity: Opening EditProfileActivity
+2025-12-07 15:20:00.050 D/ActivityResultLauncher: Launching EditProfileActivity
+2025-12-07 15:20:00.100 D/MainActivity-Lifecycle: onPause called
+2025-12-07 15:20:00.150 D/MainActivity-Lifecycle: onStop called
+2025-12-07 15:20:00.200 D/EditProfileActivity-Lifecycle: onCreate called
+2025-12-07 15:20:00.250 D/EditProfileActivity-Lifecycle: onStart called
+2025-12-07 15:20:00.300 D/EditProfileActivity-Lifecycle: onResume called
+2025-12-07 15:20:00.350 D/EditProfileActivity: Loaded existing data
+--- User edits and saves ---
+2025-12-07 15:22:00.000 D/EditProfileActivity: Save button clicked
+2025-12-07 15:22:00.050 D/EditProfileActivity: Name changed: Ahmed -> Ali
+2025-12-07 15:22:00.100 D/EditProfileActivity: Email changed: ahmed@x.com -> ali@x.com
+2025-12-07 15:22:00.150 D/Intent: Returning result to MainActivity
+2025-12-07 15:22:00.200 D/EditProfileActivity-Lifecycle: onPause called
+2025-12-07 15:22:00.250 D/EditProfileActivity-Lifecycle: onStop called
+2025-12-07 15:22:00.300 D/EditProfileActivity-Lifecycle: onDestroy called
+2025-12-07 15:22:00.350 D/MainActivity-Lifecycle: onRestart called
+2025-12-07 15:22:00.400 D/MainActivity-Lifecycle: onStart called
+2025-12-07 15:22:00.450 D/MainActivity-Lifecycle: onResume called
+2025-12-07 15:22:00.500 D/ActivityResultLauncher: Result received - RESULT_OK
+2025-12-07 15:22:00.550 D/MainActivity: Profile updated: Ali, ali@x.com
+2025-12-07 15:22:00.600 D/UserViewModel: User set: Ali
+2025-12-07 15:22:00.650 D/UserViewModel: Saved User to SharedPreferences
+```
+
+### Scenario 15: App in Background - Push Notification Arrives
+```
+2025-12-07 15:25:00.000 D/MainActivity-Lifecycle: onPause called
+2025-12-07 15:25:00.050 D/MainActivity-Lifecycle: onStop called
+2025-12-07 15:26:00.000 D/FCM: Push notification received
+2025-12-07 15:26:00.050 D/NotificationManager: Displaying notification
+2025-12-07 15:26:00.100 D/NotificationManager: Title: New Message
+2025-12-07 15:26:00.150 D/NotificationManager: Body: You have 3 new messages
+--- User taps notification ---
+2025-12-07 15:26:05.000 D/Intent: Opening MainActivity from notification
+2025-12-07 15:26:05.050 D/MainActivity-Lifecycle: onRestart called
+2025-12-07 15:26:05.100 D/MainActivity-Lifecycle: onStart called
+2025-12-07 15:26:05.150 D/MainActivity-Lifecycle: onResume called
+2025-12-07 15:26:05.200 D/MainActivity: Handling notification intent
+2025-12-07 15:26:05.250 D/MainActivity: Opening messages screen
+```
+
+### Scenario 16: Orientation Change During Network Request
+```
+2025-12-07 15:30:00.000 D/MainActivity: User clicks Load Data button
+2025-12-07 15:30:00.050 D/Volley: Sending GET request
+2025-12-07 15:30:00.100 D/MainActivity: Showing loading spinner
+--- User rotates device during loading ---
+2025-12-07 15:30:01.000 D/MainActivity-Lifecycle: onPause called
+2025-12-07 15:30:01.050 D/MainActivity-Lifecycle: onStop called
+2025-12-07 15:30:01.100 D/MainActivity-Lifecycle: onDestroy called
+2025-12-07 15:30:01.150 D/MainActivity-Lifecycle: onCreate called
+2025-12-07 15:30:01.200 D/MainActivity-Lifecycle: onStart called
+2025-12-07 15:30:01.250 D/MainActivity-Lifecycle: onResume called
+2025-12-07 15:30:01.300 D/MainActivity: ViewModel retained during rotation
+2025-12-07 15:30:01.350 D/MainActivity: Loading spinner still visible
+--- Network response arrives ---
+2025-12-07 15:30:02.000 D/Volley: User from API: Ahmed, Age: 25
+2025-12-07 15:30:02.050 D/UserViewModel: User set: Ahmed
+2025-12-07 15:30:02.100 D/MainActivity: Loading spinner hidden
+2025-12-07 15:30:02.150 D/MainActivity: Data displayed successfully after rotation
+```
+
+### Scenario 17: Multiple Fragment Transactions
+```
+2025-12-07 15:35:00.000 D/MainActivity-Lifecycle: onCreate called
+2025-12-07 15:35:00.050 D/FragmentManager: Adding HomeFragment
+2025-12-07 15:35:00.100 D/HomeFragment-Lifecycle: onAttach called
+2025-12-07 15:35:00.150 D/HomeFragment-Lifecycle: onCreate called
+2025-12-07 15:35:00.200 D/HomeFragment-Lifecycle: onCreateView called
+2025-12-07 15:35:00.250 D/HomeFragment-Lifecycle: onStart called
+2025-12-07 15:35:00.300 D/HomeFragment-Lifecycle: onResume called
+--- User navigates to Profile tab ---
+2025-12-07 15:36:00.000 D/MainActivity: Switching to ProfileFragment
+2025-12-07 15:36:00.050 D/HomeFragment-Lifecycle: onPause called
+2025-12-07 15:36:00.100 D/ProfileFragment-Lifecycle: onCreate called
+2025-12-07 15:36:00.150 D/ProfileFragment-Lifecycle: onCreateView called
+2025-12-07 15:36:00.200 D/ProfileFragment-Lifecycle: onStart called
+2025-12-07 15:36:00.250 D/ProfileFragment-Lifecycle: onResume called
+2025-12-07 15:36:00.300 D/HomeFragment-Lifecycle: onStop called
+```
+
+### Scenario 18: Camera Intent and Photo Capture
+```
+2025-12-07 15:40:00.000 D/MainActivity: User clicks Take Photo button
+2025-12-07 15:40:00.050 D/Intent: ACTION_IMAGE_CAPTURE
+2025-12-07 15:40:00.100 D/ActivityResultLauncher: Launching camera
+2025-12-07 15:40:00.150 D/MainActivity-Lifecycle: onPause called
+2025-12-07 15:40:00.200 D/MainActivity-Lifecycle: onStop called
+2025-12-07 15:40:00.250 D/CameraApp: Camera opened
+--- User takes photo ---
+2025-12-07 15:40:10.000 D/CameraApp: Photo captured
+2025-12-07 15:40:10.050 D/ActivityResultLauncher: Result received - RESULT_OK
+2025-12-07 15:40:10.100 D/MainActivity-Lifecycle: onRestart called
+2025-12-07 15:40:10.150 D/MainActivity-Lifecycle: onStart called
+2025-12-07 15:40:10.200 D/MainActivity-Lifecycle: onResume called
+2025-12-07 15:40:10.250 D/MainActivity: Photo received as Bitmap
+2025-12-07 15:40:10.300 D/MainActivity: Displaying photo in ImageView
+2025-12-07 15:40:10.350 D/MainActivity: Photo size: 1024x768
 ```
 
 ---
 
-### **ح) ACTION_MAIN**
+## 📝 Best Practices
 
-* عادة تستخدم لتحديد الـ Activity الرئيسي عند بدء التطبيق من الـ Launcher.
-* مثال في Manifest:
+### 1. Data Management
+- Always use ViewModel to survive configuration changes
+- Use LiveData for reactive UI updates
+- Save important data in onPause()
+- Load data in onCreate() or onRestart()
 
-```xml
-<intent-filter>
-    <action android:name="android.intent.action.MAIN" />
-    <category android:name="android.intent.category.LAUNCHER" />
-</intent-filter>
+### 2. Network Operations
+- Use Volley for simple HTTP requests
+- Parse JSON with Gson
+- Handle errors gracefully
+- Show loading indicators
+
+### 3. Lifecycle Management
+- Log all lifecycle events for debugging
+- Release resources in onPause()/onStop()
+- Handle orientation changes properly
+- Save state before destruction
+
+### 4. RecyclerView Optimization
+- Use ViewHolder pattern
+- Implement efficient data updates
+- Handle click events properly
+- Use DiffUtil for large lists
+
+### 5. Intent Usage
+- Use Explicit Intents for internal navigation
+- Use Implicit Intents for external actions
+- Check permissions before sensitive operations
+- Handle Intent resolution failures
+
+---
+
+## 🔍 Common Issues & Solutions
+
+### Issue 1: Data Lost on Rotation
+**Solution**: Use ViewModel to retain data
+```java
+userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+```
+
+### Issue 2: Memory Leaks
+**Solution**: Use LiveData and proper lifecycle awareness
+```java
+userViewModel.getUser().observe(this, user -> {
+    // Update UI
+});
+```
+
+### Issue 3: Network on Main Thread
+**Solution**: Volley handles threading automatically
+```java
+RequestQueue queue = Volley.newRequestQueue(this);
+// Volley executes on background thread
+```
+
+### Issue 4: RecyclerView Not Updating
+**Solution**: Call notifyDataSetChanged() or use DiffUtil
+```java
+adapter.notifyDataSetChanged();
 ```
 
 ---
 
-### **ط) ACTION_BROWSE**
+## 📚 Additional Resources
 
-* لفتح متصفح الملفات أو رابط معين داخل التطبيقات الداعمة.
+- [Android Lifecycle Documentation](https://developer.android.com/guide/components/activities/activity-lifecycle)
+- [ViewModel Overview](https://developer.android.com/topic/libraries/architecture/viewmodel)
+- [RecyclerView Guide](https://developer.android.com/guide/topics/ui/layout/recyclerview)
+- [Volley Documentation](https://developer.android.com/training/volley)
+- [Gson User Guide](https://github.com/google/gson/blob/master/UserGuide.md)
 
 ---
 
-### **ملاحظات عامة**
+## 📄 License
+This guide is provided as educational material. Feel free to use and modify as needed.
 
-* كل Action يمكن أن يقترن بـ **MIME type** لتحديد نوع البيانات (مثل نصوص، صور، فيديو).
-* بعض Actions تتطلب **صلاحيات إضافية** مثل `CALL_PHONE`.
-* عند استخدام **Implicit Intents**، Android يبحث عن أي Activity يمكنها التعامل مع هذا Action وData type.
+## 🤝 Contributing
+Contributions are welcome! Feel free to submit issues or pull requests.
 
+---
+
+**Created by**: Android Development Team  
+**Last Updated**: December 2025
 ---
 ## 📚 مصادر إضافية
 
