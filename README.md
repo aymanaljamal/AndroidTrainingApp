@@ -1924,7 +1924,208 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 3. **Java Object** يمثل البيانات بشكل منطقي، ويستعمل مع أي مصدر: JSON أو XML
 
 ---
+📌 شرح Intents في Android
+1. ما هو Intent؟
 
+Intent هو رسالة داخلية في Android تقول:
+
+"أريد أن أفعل هذا الشيء، هل هناك مكون يمكنه التعامل معه؟"
+
+يمكن استخدامه لفتح Activity، بدء Service، أو إرسال Broadcast.
+
+---
+
+2. أنواع Intents
+
+
+### 1️⃣ **Explicit Intents (صريح)**
+
+* تستخدم للتنقل داخل تطبيقك بين شاشات (Activities) أو لبدء Services.
+
+**أمثلة:**
+
+**أ) فتح Activity أخرى:**
+
+```java
+Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+startActivity(intent);
+```
+
+**ب) بدء خدمة:**
+
+```java
+Intent intent = new Intent(this, MyService.class);
+startService(intent);
+```
+
+**ج) فتح Activity مع تمرير بيانات:**
+
+```java
+Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+intent.putExtra("username", "Ayman");
+intent.putExtra("age", 25);
+startActivity(intent);
+```
+
+---
+
+### 2️⃣ **Implicit Intents (ضمني)**
+
+* تستخدم لطلب Android أو التطبيقات الأخرى القيام بعمل محدد بدون معرفة المكون مباشرة.
+
+**أمثلة:**
+
+**أ) فتح رابط ويب:**
+
+```java
+Intent intent = new Intent(Intent.ACTION_VIEW);
+intent.setData(Uri.parse("https://www.google.com"));
+startActivity(intent);
+```
+
+**ب) مشاركة نص:**
+
+```java
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.setType("text/plain");
+intent.putExtra(Intent.EXTRA_TEXT, "Hello from my app!");
+startActivity(Intent.createChooser(intent, "Share via"));
+```
+
+**ج) فتح تطبيق البريد لإرسال رسالة:**
+
+```java
+Intent intent = new Intent(Intent.ACTION_SENDTO);
+intent.setData(Uri.parse("mailto:example@gmail.com"));
+intent.putExtra(Intent.EXTRA_SUBJECT, "Subject here");
+intent.putExtra(Intent.EXTRA_TEXT, "Body of the email");
+startActivity(intent);
+```
+
+**د) فتح جهات الاتصال:**
+
+```java
+Intent intent = new Intent(Intent.ACTION_PICK);
+intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
+startActivity(intent);
+```
+
+---
+
+### 3️⃣ **Intent Filter في Manifest**
+
+* يحدد لأي أنواع Intents يمكن للـ Activity أن تتعامل معها.
+
+**أمثلة:**
+
+**أ) استقبال نصوص وصور:**
+
+```xml
+<activity android:name=".ShareActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.SEND"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <data android:mimeType="text/plain"/>
+        <data android:mimeType="image/*"/>
+    </intent-filter>
+</activity>
+```
+
+**ب) استقبال روابط ويب (فتح المتصفح داخليًا أو مشاركة الرابط):**
+
+```xml
+<activity android:name=".WebActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="https" android:host="www.example.com"/>
+    </intent-filter>
+</activity>
+```
+
+---
+
+### 4️⃣ **تمرير البيانات مع putExtra()**
+
+**أمثلة:**
+
+**أ) تمرير نص:**
+
+```java
+intent.putExtra(Intent.EXTRA_TEXT, "Hello World");
+```
+
+**ب) تمرير موضوع (subject):**
+
+```java
+intent.putExtra(Intent.EXTRA_SUBJECT, "Greetings");
+```
+
+**ج) تمرير أرقام أو boolean:**
+
+```java
+intent.putExtra("score", 95);
+intent.putExtra("isPremiumUser", true);
+```
+
+**د) تمرير Arrays أو Serializable Objects:**
+
+```java
+intent.putExtra("names", new String[]{"Ali", "Sara", "Lina"});
+intent.putExtra("user", userObject); // userObject implements Serializable
+```
+
+---
+
+### 5️⃣ **startActivityForResult() + onActivityResult()**
+
+* تستخدم لاسترجاع بيانات من Activity أخرى.
+
+**أمثلة:**
+
+**أ) إرسال طلب:**
+
+```java
+private static final int REQUEST_CODE = 1;
+
+Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+startActivityForResult(intent, REQUEST_CODE);
+```
+
+**ب) استقبال النتيجة:**
+
+```java
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if(requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+        String result = data.getStringExtra("resultKey");
+        Toast.makeText(this, "Result: " + result, Toast.LENGTH_SHORT).show();
+    }
+}
+```
+
+**ج) إرجاع البيانات من SecondActivity:**
+
+```java
+Intent returnIntent = new Intent();
+returnIntent.putExtra("resultKey", "This is the result");
+setResult(RESULT_OK, returnIntent);
+finish();
+```
+
+---
+
+### 6️⃣ **ملاحظات مهمة قبل الكود**
+
+* **Explicit Intent**: تحدد المكون مباشرة، لا يحتاج Intent Filter.
+* **Implicit Intent**: يعتمد على Action وData، يحتاج Intent Filter في Manifest.
+* **DEFAULT category**: ضروري للـ Implicit Intents.
+* **putExtra()**: لتمرير البيانات بين Activities.
+* **startActivityForResult()**: لاسترجاع بيانات من Activity أخرى.
+
+---
 
 ## 📚 مصادر إضافية
 
