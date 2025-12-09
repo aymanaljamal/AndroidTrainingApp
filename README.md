@@ -883,7 +883,7 @@ content://com.android.contacts/contacts/5
 
 ---
 
-## 🔍 Querying Content Providers: Examples
+## ~~🔍 Querying Content Providers: Examples~~
 
 ### مثال 1: قراءة جهات الاتصال
 
@@ -939,7 +939,7 @@ public void readContacts() {
 }
 ```
 
-### مثال 2: قراءة الصور من المعرض
+### ~~مثال 2: قراءة الصور من المعرض~~
 
 #### الصلاحية:
 ```xml
@@ -1013,7 +1013,7 @@ Cursor cursor = getContentResolver().query(
 
 </p>
 
-### مثال 4: قراءة أرقام الهواتف لجهة اتصال
+### ~~مثال 3: استخدام WHERE clause (فلترة البيانات)~~
 
 ```java
 private void getPhoneNumbers(String contactId) {
@@ -1059,7 +1059,7 @@ private String getPhoneTypeLabel(int type) {
 }
 ```
 
-### مثال 5: قراءة الرسائل SMS
+### ~~مثال 5: قراءة الرسائل SMS~~
 
 #### الصلاحية:
 ```xml
@@ -1738,7 +1738,7 @@ intent.putExtra(Intent.EXTRA_TEXT, "Email body");
 startActivity(intent);
 ```
 
-#### Pick Contact
+#### ~~Pick Contact~~
 ```java
 // NEW WAY - Using Activity Result API
 private ActivityResultLauncher<Intent> pickContactLauncher;
