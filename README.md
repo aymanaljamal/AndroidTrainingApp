@@ -1780,6 +1780,7 @@ btnPickContact.setOnClickListener(v -> {
 ---
 
 ## <a id="scenarios"></a>8️⃣ Practical Scenarios with Logcat
+![Lifecycle Diagram](https://raw.githubusercontent.com/aymanaljamal/AndroidTrainingApp/master/59d40f71d715436.png)
 
 ### Scenario 1: First App Launch
 ```
