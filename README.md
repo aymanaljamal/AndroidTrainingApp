@@ -885,7 +885,7 @@ content://com.android.contacts/contacts/5
 
 ## ~~🔍 Querying Content Providers: Examples~~
 
-### مثال 1: قراءة جهات الاتصال
+### ~~مثال 1: قراءة جهات الاتصال~~
 
 #### إضافة الصلاحية في AndroidManifest.xml:
 ```xml
