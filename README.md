@@ -1989,7 +1989,7 @@ btnPickContact.setOnClickListener(v -> {
 2025-12-07 15:26:05.250 D/MainActivity: Opening messages screen
 ```
 
-###Scenario 16a: Orientation Change During Network Request (With ViewModel)
+### Scenario 16a: Orientation Change During Network Request (With ViewModel)
 ```
 2025-12-07 15:30:00.000 D/MainActivity: User clicks Load Data button
 2025-12-07 15:30:00.050 D/Volley: Sending GET request
@@ -2012,7 +2012,7 @@ btnPickContact.setOnClickListener(v -> {
 
 ✅ البيانات محفوظة، الـActivity الجديد يستقبلها مباشرة.
 
-###Scenario 16b: Orientation Change During Network Request (Without ViewModel)
+### Scenario 16b: Orientation Change During Network Request (Without ViewModel)
 ```
 2025-12-07 15:30:00.000 D/MainActivity: User clicks Load Data button
 2025-12-07 15:30:00.050 D/Volley: Sending GET request
