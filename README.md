@@ -1989,8 +1989,7 @@ btnPickContact.setOnClickListener(v -> {
 2025-12-07 15:26:05.250 D/MainActivity: Opening messages screen
 ```
 
-### Scenario 16: Orientation Change During Network Request
-```
+Scenario 16a: Orientation Change During Network Request (With ViewModel)
 2025-12-07 15:30:00.000 D/MainActivity: User clicks Load Data button
 2025-12-07 15:30:00.050 D/Volley: Sending GET request
 2025-12-07 15:30:00.100 D/MainActivity: Showing loading spinner
@@ -2008,7 +2007,34 @@ btnPickContact.setOnClickListener(v -> {
 2025-12-07 15:30:02.050 D/UserViewModel: User set: Ahmed
 2025-12-07 15:30:02.100 D/MainActivity: Loading spinner hidden
 2025-12-07 15:30:02.150 D/MainActivity: Data displayed successfully after rotation
-```
+
+
+✅ البيانات محفوظة، الـActivity الجديد يستقبلها مباشرة.
+
+Scenario 16b: Orientation Change During Network Request (Without ViewModel)
+2025-12-07 15:30:00.000 D/MainActivity: User clicks Load Data button
+2025-12-07 15:30:00.050 D/Volley: Sending GET request
+2025-12-07 15:30:00.100 D/MainActivity: Showing loading spinner
+--- User rotates device during loading ---
+2025-12-07 15:30:01.000 D/MainActivity-Lifecycle: onPause called
+2025-12-07 15:30:01.050 D/MainActivity-Lifecycle: onStop called
+2025-12-07 15:30:01.100 D/MainActivity-Lifecycle: onDestroy called
+2025-12-07 15:30:01.150 D/MainActivity-Lifecycle: onCreate called
+2025-12-07 15:30:01.200 D/MainActivity-Lifecycle: onStart called
+2025-12-07 15:30:01.250 D/MainActivity-Lifecycle: onResume called
+2025-12-07 15:30:01.350 D/MainActivity: Loading spinner visible, لكن البيانات السابقة مفقودة
+--- Network response arrives ---
+2025-12-07 15:30:02.000 D/Volley: User from API: Ahmed, Age: 25
+2025-12-07 15:30:02.050 D/MainActivity: Attempting to update UI
+2025-12-07 15:30:02.100 D/MainActivity: Loading spinner hidden
+2025-12-07 15:30:02.150 D/MainActivity: Data displayed successfully
+
+
+❌ البيانات مفقودة مؤقتاً عند إنشاء الـActivity الجديد، حتى يصل Response مرة أخرى.
+
+هذا يسبب فلاش أو فقدان بيانات مؤقت.
+
+الحل الأمثل: استخدام ViewModel أو SavedStateHandle للاحتفاظ بالبيانات خلال إعادة إنشاء Activity.
 
 ### Scenario 17: Multiple Fragment Transactions
 ```
