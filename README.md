@@ -994,7 +994,7 @@ public void readImages() {
 }
 ```
 
-### مثال 3: استخدام WHERE clause (فلترة البيانات)
+### ~~مثال 3: استخدام WHERE clause (فلترة البيانات)~~
 <p dir="ltr">
 
 ```java
@@ -1013,8 +1013,7 @@ Cursor cursor = getContentResolver().query(
 
 </p>
 
-### ~~مثال 3: استخدام WHERE clause (فلترة البيانات)~~
-
+### ~~مثال كالمل~~
 ```java
 private void getPhoneNumbers(String contactId) {
     Uri phoneUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
