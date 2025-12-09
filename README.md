@@ -2038,7 +2038,7 @@ btnPickContact.setOnClickListener(v -> {
 
 الحل الأمثل: استخدام ViewModel أو SavedStateHandle للاحتفاظ بالبيانات خلال إعادة إنشاء Activity.
 
-### Scenario 17: Multiple Fragment Transactions
+## ~~Scenario 17: Multiple Fragment Transactions~~
 ```
 2025-12-07 15:35:00.000 D/MainActivity-Lifecycle: onCreate called
 2025-12-07 15:35:00.050 D/FragmentManager: Adding HomeFragment
