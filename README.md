@@ -1356,7 +1356,7 @@ JsonArrayRequest request = new JsonArrayRequest(
 queue.add(request);
 ```
 
-### POST Request Example
+### ~~POST Request Example~~
 ```java
 String url = "https://api.example.com/user/create";
 JSONObject jsonBody = new JSONObject();
